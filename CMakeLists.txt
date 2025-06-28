@@ -13,7 +13,7 @@ add_executable(helloworld_cli main.cpp)
 add_library(helloworld lib.cpp)
 
 set_target_properties(helloworld_cli helloworld PROPERTIES
-    CXX_STANDARD 14
+    CXX_STANDARD 17
     CXX_STANDARD_REQUIRED ON
 )
 
