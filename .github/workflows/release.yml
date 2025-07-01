@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - feature/github_actions
+      - feature/github_actions_gtest_submodule
 
 jobs:
   build:
@@ -13,11 +13,17 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - run: sudo apt-get update && sudo apt-get install libboost-test-dev -y
-      - run: cmake . -DPATCH_VERSION=${{ github.run_number }} -DWITH_BOOST_TEST=ON
-      - run: cmake --build .
+      - name: Install CMake
+        run: sudo apt-get update && sudo apt-get install -y cmake
+      - name: Install Boost
+        run: sudo apt-get update && sudo apt-get install libboost-test-dev -y
+      - name: Configure CMake
+        run: cmake . -DPATCH_VERSION=${{ github.run_number }} -DWITH_BOOST_TEST=ON -DWITH_GOOGLE_TEST=ON
+      - name: Build Project
+        run: cmake --build .
       - run: cmake --build . --target test
-      - run: cmake --build . --target package
+      - name: Build Package
+        run: cmake --build . --target package
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
