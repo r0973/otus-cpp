@@ -5,6 +5,8 @@ on:
     branches:
       - master
       - feature/github_actions_gtest
+    tags:
+      - 'v*'
 
 jobs:
   build:
@@ -46,16 +48,19 @@ jobs:
         run: cmake --build . --target package
       
       - name: Create Release
+        if: startsWith(github.ref, 'refs/tags/')
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.run_number }}
-          release_name: Release ${{ github.run_number }}
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
           draft: false
           prerelease: false
+      
       - name: Upload Release Asset
+        if: startsWith(github.ref, 'refs/tags/')
         id: upload-release-asset
         uses: actions/upload-release-asset@v1
         env:
