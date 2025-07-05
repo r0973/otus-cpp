@@ -6,6 +6,7 @@ set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 project(helloworld VERSION ${PROJECT_VESRION})
 
 option(WITH_BOOST_TEST "Whether to build Boost test" ON)
+option(WITH_GOOGLE_TEST "Whether to build Google test" ON)
 
 configure_file(version.h.in version.h)
 
@@ -45,6 +46,23 @@ if(WITH_BOOST_TEST)
     )
 endif()
 
+if(WITH_GOOGLE_TEST)
+    # Включение подмодуля GoogleTest
+    add_subdirectory(googletest)
+
+    # Создание тестового исполняемого файла
+    add_executable(test_version_gtest test_main_gtest.cpp test_version_gtest.cpp)
+
+    # Связывание с библиотеками GoogleTest
+    target_link_libraries(test_version_gtest PRIVATE gtest gtest_main helloworld)
+
+    # Установка свойств цели
+    set_target_properties(test_version_gtest PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+    )
+endif()
+
 if (MSVC)
     target_compile_options(helloworld_cli PRIVATE
         /W4
@@ -52,8 +70,15 @@ if (MSVC)
     target_compile_options(helloworld PRIVATE
         /W4
     )
+    # Включение тестирования
     if(WITH_BOOST_TEST)
         target_compile_options(test_version PRIVATE
+            /W4
+        )
+    endif()
+    # Включение тестирования
+    if(WITH_GOOGLE_TEST)
+        target_compile_options(test_version_gtest PRIVATE
             /W4
         )
     endif()
@@ -64,8 +89,15 @@ else ()
     target_compile_options(helloworld PRIVATE
         -Wall -Wextra -pedantic -Werror
     )
+    # Включение тестирования
     if(WITH_BOOST_TEST)
         target_compile_options(test_version PRIVATE
+            -Wall -Wextra -pedantic -Werror
+        )
+    endif()
+    # Включение тестирования
+    if(WITH_GOOGLE_TEST)
+        target_compile_options(test_version_gtest PRIVATE
             -Wall -Wextra -pedantic -Werror
         )
     endif()
@@ -83,4 +115,9 @@ include(CPack)
 if(WITH_BOOST_TEST)
     enable_testing()
     add_test(test_version test_version)
+endif()
+
+if(WITH_GOOGLE_TEST)
+    enable_testing()
+    add_test(NAME gtest COMMAND test_version_gtest)
 endif()
