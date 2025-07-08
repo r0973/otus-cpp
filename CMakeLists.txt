@@ -24,7 +24,7 @@ if(WITH_GOOGLE_TEST)
 endif()
 
 if(WITH_BOOST_TEST)
-    add_subdirectory(unit_tests/boosttest)
+    add_subdirectory(unit_tests/boost)
 endif()
 
 # Настройка CPack
