@@ -19,12 +19,9 @@ endif()
 # Добавление поддиректорий
 add_subdirectory(src)
 
-if(WITH_GOOGLE_TEST)
-    add_subdirectory(unit_tests/gtest)
-endif()
-
-if(WITH_BOOST_TEST)
-    add_subdirectory(unit_tests/boost)
+if(WITH_GOOGLE_TEST OR WITH_BOOST_TEST)
+    enable_testing()
+    add_subdirectory(unit_tests)
 endif()
 
 # Настройка CPack
