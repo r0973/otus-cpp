@@ -1,6 +1,6 @@
 .vscode/
 build/
 out/
-*.txt
+*.txt ! CMakeLists.txt
 *.tsv
 *.code*
