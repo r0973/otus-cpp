@@ -1,4 +1,4 @@
-#include "lib.h"
+#include "lib_version.h"
 #include <gtest/gtest.h>
 
 // Тестовый случай для проверки валидности версии
