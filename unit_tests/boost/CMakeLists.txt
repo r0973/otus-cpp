@@ -13,8 +13,7 @@ target_compile_definitions(unit_boost_tests PRIVATE BOOST_TEST_DYN_LINK)
 target_include_directories(unit_boost_tests PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_libraries(unit_boost_tests
     ${Boost_LIBRARIES}
-    ip_filter_tool
-)
+    helloworld)
 
 # Установка опций компилятора
 if (MSVC)

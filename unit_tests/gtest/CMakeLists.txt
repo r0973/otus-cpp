@@ -8,14 +8,13 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/googletest
 add_executable(unit_tests 
 	test_main_gtest.cpp
 	test_version.cpp
-	test_ip_filter.cpp
 )
 
 # Линковка
 target_link_libraries(unit_tests PRIVATE 
 	gtest 
 	gtest_main 
-	ip_filter_tool
+	helloworld
 )
 
 # Установка стандартов
