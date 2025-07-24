@@ -49,7 +49,7 @@ public:
 		return result;
     }
 
-    void deallocate([[maybe_unused]]T* ptr, std::size_t n)
+    void deallocate([[maybe_unused]]T* ptr, [[maybe_unused]]std::size_t n)
     {
         #ifndef NDEBUG
             monitor("Deallocated ", n);
@@ -65,7 +65,10 @@ public:
 private:
 	void monitor(const std::string& msg, std::size_t n)
 	{
-		std::cout << msg << " " << n << " objects. Available memory remains: " << available_memory << " bytes" << std::endl;
+		std::cout << msg << " " 
+                  << n << " objects. Available memory remains: " 
+                  << available_memory << " bytes" 
+                  << std::endl;
 	}
 
 private:
