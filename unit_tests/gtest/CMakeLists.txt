@@ -8,13 +8,18 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/googletest
 add_executable(unit_tests 
 	test_main_gtest.cpp
 	test_version.cpp
+	test_memory_allocator.cpp
+)
+
+target_include_directories(unit_tests
+    PRIVATE "${CMAKE_SOURCE_DIR}/src"
 )
 
 # Линковка
 target_link_libraries(unit_tests PRIVATE 
 	gtest 
 	gtest_main 
-	helloworld
+	allocator_tool
 )
 
 # Установка стандартов
