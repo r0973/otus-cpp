@@ -2,95 +2,95 @@
 
 #include <memory>
 
+// simple forward list
 template <typename T, typename Allocator = std::allocator<T>>
 class CustomContainer
 {
+private:
+    struct Node
+    {
+        T data;
+        Node* next;
+    };
+
+    using AllocTraits = std::allocator_traits<Allocator>;
+    using NodeAllocator = typename AllocTraits::rebind_alloc<Node>;
+    using NodeAllocTraits = std::allocator_traits<NodeAllocator>;
+
+    Node* head = nullptr;
+    Node* tail = nullptr;
+    std::size_t listSize = 0;
+    NodeAllocator allocator;
+
 public:
     using value_type = T;
-    using allocator_type = Allocator;
-    using Alloc = typename Allocator::template rebind<T>::other;
 
-private:
-    T* data_ = nullptr;
-    std::size_t size_ = 0;
-    std::size_t capacity_ = 0;
-    Alloc allocator_;
-
-public:
     CustomContainer()
-	: allocator_(Allocator())
-	{}
+    : head{nullptr}
+    , tail{nullptr}
+    , listSize{0}
+    , allocator{NodeAllocator{}}
+    {}
 
-    void push_back(const T& value)
-	{
-        if (size_ >= capacity_) {
-            reserve(capacity_ == 0 ? 1 : capacity_ * 2);
+    void push_back(const T& value) {
+        Node* new_node = NodeAllocTraits::allocate(allocator, 1);
+        NodeAllocTraits::construct(allocator, new_node, Node{value, nullptr});
+
+        if (!head) {
+            head = new_node;
+            tail = new_node;
+        } else {
+            tail->next = new_node;
+            tail = new_node;
         }
-        allocator_.construct(data_ + size_, value);
-        ++size_;
+        ++listSize;
     }
 
-    void reserve(std::size_t new_capacity)
-	{
-        if (new_capacity > capacity_)
-		{
-            T* new_data_ = allocator_.allocate(new_capacity);
-            
-			for (std::size_t i = 0; i < size_; ++i)
-			{
-                allocator_.construct(new_data_ + i, std::move(data_[i]));
-                allocator_.destroy(data_ + i);
-            }
-            
-			if (data_)
-			{
-                allocator_.deallocate(data_, capacity_);
-            }
-            
-			data_ = new_data_;
-            capacity_ = new_capacity;
+    void pop_front() {
+        if (!head) return;
+        Node* old_head = head;
+        head = head->next;
+        if (!head) {
+            tail = nullptr;
         }
+        NodeAllocTraits::destroy(allocator, old_head);
+        NodeAllocTraits::deallocate(allocator, old_head, 1);
+        --listSize;
     }
 
     ~CustomContainer()
-	{
-        for (std::size_t i = 0; i < size_; ++i)
-		{
-            allocator_.destroy(data_ + i);
-        }
-        if (data_)
-		{
-            allocator_.deallocate(data_, capacity_);
+    {
+        while (head)
+        {
+            pop_front();
         }
     }
 
-    // Iterator for container
-    class Iterator {
+    // Простой итератор для обхода контейнера
+    class Iterator
+    {
     public:
         using iterator_category = std::forward_iterator_tag;
-        using value_type = T;
+        using value_type = Node;
         using difference_type = std::ptrdiff_t;
-        using pointer = T*;
+        using pointer = Node*;
         using reference = T&;
 
-        Iterator(pointer ptr)
-        : ptr(ptr)
-        {}
+    public:
+        Iterator(pointer ptr) : ptr_(ptr) {}
 
-        reference operator*() const { return *ptr; }
-        pointer operator->() { return ptr; }
-        Iterator& operator++() { ++ptr; return *this; }
-        Iterator operator++(int) { Iterator tmp = *this; ++ptr; return tmp; }
-        bool operator!=(const Iterator& other) const { return ptr != other.ptr; }
+        reference operator*() { return ptr_->data; }
+        Iterator& operator++() { ptr_ = ptr_->next; return *this; }
+        bool operator!=(const Iterator& other) const { return ptr_ != other.ptr_; }
 
     private:
-        pointer ptr;
+        pointer ptr_;
     };
 
-    Iterator begin() { return Iterator(data_); }
-    Iterator end() { return Iterator(data_ + size_); }
+    Iterator begin() { return Iterator(head); }
+    Iterator end() { return Iterator(nullptr); }
 
-    std::size_t size() const { return size_; }
-    bool empty() const { return size_ == 0; } 
+    std::size_t size() const { return listSize; }
 
+    bool empty() const { return listSize == 0; }
 };
