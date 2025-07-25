@@ -2,7 +2,7 @@
 configure_file(version.h.in version.h @ONLY)
 
 # Основная библиотека
-add_library(allocator_tool memory_allocator.h lib_version.cpp)
+add_library(allocator_tool memory_allocator.h custom_container.h lib_version.cpp)
 target_include_directories(allocator_tool
     PRIVATE "${CMAKE_BINARY_DIR}"
     PRIVATE "${CMAKE_BINARY_DIR}/src"

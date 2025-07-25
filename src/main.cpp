@@ -4,12 +4,15 @@
 #include <vector>
 #include <map>
 #include "memory_allocator.h"
+#include "custom_container.h"
 
-constexpr int factorial(int n) {
+constexpr int factorial(int n)
+{
     return (n == 0) ? 1 : n * factorial(n - 1);
 }
 
-int main(int, char **) {
+int main(int, char **)
+{
 	std::cout << "Version: " << version() << std::endl;
 	
 	// map with standart allocator
@@ -39,6 +42,16 @@ int main(int, char **) {
 	
 	for( auto&& v : vec )
 		std::cout << v << " ";
+	std::cout << std::endl; 
+
+	// custom container with standart allocator
+	CustomContainer<int> std_alloc_container;
+	for (int i = 0; i < 10; ++i)
+        std_alloc_container.push_back(i);
+
+	for (auto i : std_alloc_container)
+        std::cout << i << " ";
+	std::cout << std::endl; 
 
 	return 0;
 }
