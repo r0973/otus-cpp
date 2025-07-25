@@ -56,11 +56,20 @@ public:
         #endif
     }
 
+    MemoryAllocator select_on_container_copy_construction() const
+    {
+        return MemoryAllocator();
+    }
+
 	template<class U>
     struct rebind
     {
         using other = MemoryAllocator<U, PoolSize>;
     };
+
+    using propagate_on_container_copy_assignment = std::true_type;
+    using propagate_on_container_move_assignment = std::true_type;
+    using propagate_on_container_swap = std::true_type;
 
 private:
 	void monitor(const std::string& msg, std::size_t n)
