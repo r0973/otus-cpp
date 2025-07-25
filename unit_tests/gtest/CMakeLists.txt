@@ -9,6 +9,7 @@ add_executable(unit_tests
 	test_main_gtest.cpp
 	test_version.cpp
 	test_memory_allocator.cpp
+	test_custom_container.cpp
 )
 
 target_include_directories(unit_tests
