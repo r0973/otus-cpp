@@ -10,10 +10,13 @@ set_target_properties(unit_boost_tests PROPERTIES
 
 # Настройка Boost Test
 target_compile_definitions(unit_boost_tests PRIVATE BOOST_TEST_DYN_LINK)
-target_include_directories(unit_boost_tests PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_libraries(unit_boost_tests
-    ${Boost_LIBRARIES}
-    helloworld)
+target_include_directories(
+    unit_boost_tests
+    PRIVATE
+        "${Boost_INCLUDE_DIRS}"
+        "${CMAKE_SOURCE_DIR}/src"
+)
+target_link_libraries(unit_boost_tests ${Boost_LIBRARIES} helloworld)
 
 # Установка опций компилятора
 if (MSVC)
