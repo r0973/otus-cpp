@@ -20,3 +20,10 @@ print_ip(const T& ip_as_int)
     }
     std::cout << std::endl;
 }
+
+template<typename T>
+std::enable_if_t<std::is_same<T, std::string>::value>
+print_ip(const T& ip_as_string)
+{
+	std::cout << ip_as_string << std::endl;
+}
