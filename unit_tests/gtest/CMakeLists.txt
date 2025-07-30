@@ -8,6 +8,7 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/googletest
 add_executable(unit_google_tests 
 	test_main_gtest.cpp
 	test_version.cpp
+	test_print_ip.cpp
 )
 target_include_directories(unit_google_tests PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
@@ -15,7 +16,7 @@ target_include_directories(unit_google_tests PRIVATE "${CMAKE_SOURCE_DIR}/src")
 target_link_libraries(unit_google_tests PRIVATE 
 	gtest 
 	gtest_main 
-	helloworld
+	print_ip_tool
 )
 
 # Установка стандартов
