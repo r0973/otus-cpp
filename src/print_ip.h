@@ -86,3 +86,23 @@ struct is_uniform_tuple : std::false_type {};
 template <typename... Args>
 struct is_uniform_tuple<std::tuple<Args...>> 
        : std::bool_constant<are_all_same<Args...>::value> {};
+
+template<size_t I = 0, typename... Tp>
+std::enable_if_t<I == sizeof...(Tp)>
+print_tuple(const std::tuple<Tp...>&) {}
+
+template<size_t I = 0, typename... Tp>
+std::enable_if_t<I < sizeof...(Tp)>
+print_tuple(const std::tuple<Tp...>& t)
+{
+    std::cout << std::get<I>(t);
+	std::cout << (I >= 0 && I+1 != sizeof...(Tp) ? "." : "\n");
+    print_tuple<I + 1>(t);
+}
+
+template<typename T>
+std::enable_if_t<is_tuple<T>::value && is_uniform_tuple<T>::value>
+print_ip(const T& ip_as_tuple)
+{
+	print_tuple(ip_as_tuple);
+}

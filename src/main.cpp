@@ -16,6 +16,6 @@ int main(int, char **) {
 	std::cout << std::boolalpha << are_all_same<int, int, char>::value << std::endl;
 	std::cout << std::boolalpha << is_uniform_tuple<std::tuple<int, int, int>>::value << std::endl;
 	std::cout << std::boolalpha << is_uniform_tuple<std::tuple<int, int, char>>::value << std::endl;
-	// print_ip( std::make_tuple(123, 456, 789, 0) ); // 123.456.789.0
+	print_ip( std::make_tuple(123, 456, 789, 0) ); // 123.456.789.0
 	return 0;
 }
