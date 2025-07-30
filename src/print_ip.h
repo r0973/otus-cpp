@@ -7,7 +7,7 @@
 #include <algorithm>
 
 template<typename T>
-std::enable_if_t<std::is_integral<T>::value>
+std::enable_if_t<std::is_integral_v<T>>
 print_ip(const T& ip_as_int)
 {
     const size_t size = sizeof(T);
@@ -25,7 +25,7 @@ print_ip(const T& ip_as_int)
 }
 
 template<typename T>
-std::enable_if_t<std::is_same<T, std::string>::value>
+std::enable_if_t<std::is_same_v<T, std::string>>
 print_ip(const T& ip_as_string)
 {
 	std::cout << ip_as_string << "\n";
@@ -33,12 +33,14 @@ print_ip(const T& ip_as_string)
 
 template<typename T>
 struct is_container :
-	std::bool_constant<std::is_same<T, std::vector<int>>::value || 
-    	               std::is_same<T, std::list<short>>::value> {};
-
+	std::bool_constant<std::is_same_v<T, std::vector<int>> || 
+    	               std::is_same_v<T, std::list<short>>> {};
 
 template<typename T>
-std::enable_if_t<is_container<T>::value, std::ostream&>
+inline constexpr bool is_container_v = is_container<T>::value;
+
+template<typename T>
+std::enable_if_t<is_container_v<T>, std::ostream&>
 operator << (std::ostream& os, const T& cont) 
 
 {
@@ -52,10 +54,10 @@ operator << (std::ostream& os, const T& cont)
 };
 
 template<typename T>
-std::enable_if_t<is_container<T>::value>
-print_ip(const T& ip_as_container)
+std::enable_if_t<is_container_v<T>>
+print_ip(const T& ip_as_cont)
 {
-	std::cout << ip_as_container << "\n"; 
+	std::cout << ip_as_cont << "\n"; 
 }
 
 template<typename T>
@@ -64,6 +66,9 @@ struct is_tuple : std::false_type {};
 template<typename... Args>
 struct is_tuple<std::tuple<Args...>> : std::true_type {};
 
+template<typename T>
+inline constexpr bool is_tuple_v = is_tuple<T>::value;
+
 template<typename... Args>
 struct are_all_same : std::true_type {};
 
@@ -71,12 +76,20 @@ template<typename T1, typename T2, typename... Args>
 struct are_all_same<T1, T2, Args...>
     : std::bool_constant<std::is_same_v<T1, T2> && are_all_same<T1, Args...>::value> {};
 
+template <typename... Args>
+inline constexpr bool are_all_same_v = are_all_same<Args...>::value;
 template<typename T>
 struct is_uniform_tuple : std::false_type {};
 
 template<typename... Args>
 struct is_uniform_tuple<std::tuple<Args...>> 
-       : std::bool_constant<are_all_same<Args...>::value> {};
+       : std::bool_constant<are_all_same_v<Args...>> {};
+
+template<typename... Args>
+inline constexpr bool is_uniform_tuple_v = is_uniform_tuple<Args...>::value;
+
+namespace detail
+{
 
 template<size_t I = 0, typename... Tp>
 std::enable_if_t<I == sizeof...(Tp)>
@@ -91,9 +104,11 @@ print_tuple(const std::tuple<Tp...>& t)
     print_tuple<I + 1>(t);
 }
 
+}// end namespace detail
+
 template<typename T>
-std::enable_if_t<is_tuple<T>::value && is_uniform_tuple<T>::value>
+std::enable_if_t<is_tuple_v<T> && is_uniform_tuple_v<T>>
 print_ip(const T& ip_as_tuple)
 {
-	print_tuple(ip_as_tuple);
+	detail::print_tuple(ip_as_tuple);
 }
