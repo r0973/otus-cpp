@@ -36,6 +36,7 @@ int main(int, char **) {
 	std::cout << is_uniform_tuple_v<std::tuple<int, int, int>> << std::endl;
 	std::cout << is_uniform_tuple_v<std::tuple<int, int, char>> << std::endl;
 	detail::print_tuple(std::make_tuple(123, 456, 789, 0));
+	std::cout << std::endl;
 	std::cout << std::vector{1,2,3} << std::endl;
 	std::cout << std::list<short>{1,2,3} << std::endl;
 	return 0;
