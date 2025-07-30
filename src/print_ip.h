@@ -1,11 +1,12 @@
 #pragma once
 
+#include <iostream>
 #include <type_traits>
 #include <vector>
 #include <list>
-#include <iostream>
+#include <algorithm>
 
-template <typename T>
+template<typename T>
 std::enable_if_t<std::is_integral<T>::value>
 print_ip(const T& ip_as_int)
 {
@@ -20,70 +21,60 @@ print_ip(const T& ip_as_int)
         int shift = 8 * (size - 1 - i);
         std::cout << static_cast<int>((ip_as_int >> shift) & 0xFF);
     }
-    std::cout << std::endl;
+    std::cout << "\n";
 }
 
 template<typename T>
 std::enable_if_t<std::is_same<T, std::string>::value>
 print_ip(const T& ip_as_string)
 {
-	std::cout << ip_as_string << std::endl;
+	std::cout << ip_as_string << "\n";
 }
 
 template<typename T>
-std::enable_if_t<std::is_same<T, std::vector<int>>::value || 
-                 std::is_same<T, std::list<short>>::value,
-				 std::ostream&>
-operator << (std::ostream& os, const T& container)
+struct is_container :
+	std::bool_constant<std::is_same<T, std::vector<int>>::value || 
+    	               std::is_same<T, std::list<short>>::value> {};
+
+
+template<typename T>
+std::enable_if_t<is_container<T>::value, std::ostream&>
+operator << (std::ostream& os, const T& cont) 
+
 {
-	if (!container.empty())
+	if (!cont.empty())
 	{
-		auto first = std::cbegin(container);
-		auto last = std::cend(container);
-		for (; first != last; ++first)
-		{
-			if (first != std::cbegin(container))
-			{
-				os << ".";
-			}
-			os << *first;
-		}
-		os << std::endl;
+		std::for_each(std::cbegin(cont), std::prev(std::cend(cont)),
+			[&os](const auto& val) { os << val << "."; });
+		os << cont.back();
 	}
 	return os;
 };
 
 template<typename T>
-std::enable_if_t<std::is_same<T, std::vector<int>>::value>
-print_ip(const T& ip_as_vector)
+std::enable_if_t<is_container<T>::value>
+print_ip(const T& ip_as_container)
 {
-	std::cout << ip_as_vector; 
+	std::cout << ip_as_container << "\n"; 
 }
 
 template<typename T>
-std::enable_if_t<std::is_same<T,std::list<short>>::value>
-print_ip(const T& ip_as_list)
-{
-	std::cout << ip_as_list;
-}
-
-template <typename T>
 struct is_tuple : std::false_type {};
 
-template <typename... Args>
+template<typename... Args>
 struct is_tuple<std::tuple<Args...>> : std::true_type {};
 
-template <typename... Args>
+template<typename... Args>
 struct are_all_same : std::true_type {};
 
-template <typename T1, typename T2, typename... Args>
+template<typename T1, typename T2, typename... Args>
 struct are_all_same<T1, T2, Args...>
     : std::bool_constant<std::is_same_v<T1, T2> && are_all_same<T1, Args...>::value> {};
 
-template <typename T>
+template<typename T>
 struct is_uniform_tuple : std::false_type {};
 
-template <typename... Args>
+template<typename... Args>
 struct is_uniform_tuple<std::tuple<Args...>> 
        : std::bool_constant<are_all_same<Args...>::value> {};
 
