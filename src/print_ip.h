@@ -66,3 +66,23 @@ print_ip(const T& ip_as_list)
 {
 	std::cout << ip_as_list;
 }
+
+template <typename T>
+struct is_tuple : std::false_type {};
+
+template <typename... Args>
+struct is_tuple<std::tuple<Args...>> : std::true_type {};
+
+template <typename... Args>
+struct are_all_same : std::true_type {};
+
+template <typename T1, typename T2, typename... Args>
+struct are_all_same<T1, T2, Args...>
+    : std::bool_constant<std::is_same_v<T1, T2> && are_all_same<T1, Args...>::value> {};
+
+template <typename T>
+struct is_uniform_tuple : std::false_type {};
+
+template <typename... Args>
+struct is_uniform_tuple<std::tuple<Args...>> 
+       : std::bool_constant<are_all_same<Args...>::value> {};
