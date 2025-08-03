@@ -16,7 +16,7 @@ target_include_directories(
         "${Boost_INCLUDE_DIRS}"
         "${CMAKE_SOURCE_DIR}/src"
 )
-target_link_libraries(unit_boost_tests ${Boost_LIBRARIES} helloworld)
+target_link_libraries(unit_boost_tests ${Boost_LIBRARIES} print_ip_tool)
 
 # Установка опций компилятора
 if (MSVC)
