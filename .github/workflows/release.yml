@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - master
-      - feature/ip_filter
+      - feature/print_ip
     tags:
       - 'v*'
 jobs:
