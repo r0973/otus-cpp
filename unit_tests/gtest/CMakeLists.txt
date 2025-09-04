@@ -13,11 +13,13 @@ add_executable(unit_google_tests
 	test_document_view.cpp
 	test_primitives.cpp
 )
+
 # Добавляем директории с заголовочными файлами
 target_include_directories(unit_google_tests PRIVATE 
     ${CMAKE_SOURCE_DIR}/include
     ${CMAKE_BINARY_DIR}/src
 )
+
 # Линковка
 target_link_libraries(unit_google_tests PRIVATE 
 	gtest 
