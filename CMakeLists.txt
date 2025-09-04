@@ -16,11 +16,13 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "Install path prefix" FORCE)
 endif()
 
+# unit_tests/CMakeLists.txt
+enable_testing()
+
 # Добавление поддиректорий
 add_subdirectory(src)
 
 if(WITH_GOOGLE_TEST OR WITH_BOOST_TEST)
-    enable_testing()
     add_subdirectory(unit_tests)
 endif()
 

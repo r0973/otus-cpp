@@ -40,10 +40,17 @@ else()
 	target_compile_options(unit_google_tests PRIVATE -Wall -Wextra -pedantic -Werror)
 endif()
 
+# Включаем тестирование до обнаружения тестов
+enable_testing()
+
+# Автоматическое обнаружение всех тестов
+include(GoogleTest)
+gtest_discover_tests(unit_google_tests)
+
 install(TARGETS unit_google_tests
     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
 )
 
-# Настройка тестов
-enable_testing()
-add_test(NAME gtest COMMAND unit_google_tests)
+# # Настройка тестов
+# enable_testing()
+# add_test(NAME gtest COMMAND unit_google_tests)
