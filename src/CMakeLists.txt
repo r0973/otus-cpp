@@ -1,3 +1,7 @@
+# Настройка версии
+configure_file(version.h.in version.h @ONLY)
+
+
 # Добавляем поддиректории
 add_subdirectory(models)
 add_subdirectory(primitives)
