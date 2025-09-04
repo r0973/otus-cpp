@@ -57,7 +57,7 @@ public:
      * @param primitive \en Pointer to the graphic primitive.
      *                     \ru Указатель на графический примитив.
      */
-    void addPrimitive(std::shared_ptr<class GraphicPrimitive> primitive) override;
+    void addPrimitive(std::shared_ptr<GraphicPrimitive> primitive) override;
 
     /**
      * @brief \en Removes a graphic primitive from the document.
@@ -65,7 +65,7 @@ public:
      * @param primitive \en Pointer to the graphic primitive.
      *                     \ru Указатель на графический примитив.
      */
-    void removePrimitive(std::shared_ptr<class GraphicPrimitive> primitive) override;
+    void removePrimitive(std::shared_ptr<GraphicPrimitive> primitive) override;
 
 private:
     std::shared_ptr<DocumentModel> document_; ///< \en Pointer to the document model.

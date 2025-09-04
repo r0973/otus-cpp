@@ -9,8 +9,6 @@
 #include <vector>
 #include <string>
 
-class GraphicPrimitive;
-
 /**
  * @class DocumentModel
  * @brief \en Class for document model.

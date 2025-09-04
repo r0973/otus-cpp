@@ -8,8 +8,7 @@
 #include <memory>
 #include <string>
 
-class Model;
-class View;
+class GraphicPrimitive;
 
 /**
  * @class Controller
@@ -49,7 +48,7 @@ public:
      * @param primitive \en Pointer to the graphic primitive.
      *                     \ru Указатель на графический примитив.
      */
-    virtual void addPrimitive(std::shared_ptr<class GraphicPrimitive> primitive) = 0;
+    virtual void addPrimitive(std::shared_ptr<GraphicPrimitive> primitive) = 0;
 
     /**
      * @brief \en Removes a graphic primitive from the document.
@@ -57,5 +56,5 @@ public:
      * @param primitive \en Pointer to the graphic primitive.
      *                     \ru Указатель на графический примитив.
      */
-    virtual void removePrimitive(std::shared_ptr<class GraphicPrimitive> primitive) = 0;
+    virtual void removePrimitive(std::shared_ptr<GraphicPrimitive> primitive) = 0;
 };
