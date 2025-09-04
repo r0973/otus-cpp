@@ -1,6 +1,8 @@
 # Указываем полный путь к исходникам и бинарной директории
 add_subdirectory(${CMAKE_SOURCE_DIR}/googletest 
 	${CMAKE_BINARY_DIR}/googletest
+	# ${CMAKE_BINARY_DIR}/src  # для version.h
+    # ${CMAKE_SOURCE_DIR}/include
 	EXCLUDE_FROM_ALL
 )
 
@@ -8,14 +10,18 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/googletest
 add_executable(unit_google_tests 
 	test_main_gtest.cpp
 	test_version.cpp
+	test_document_model.cpp
+	test_document_controller.cpp
+	test_document_view.cpp
+	test_primitives.cpp
 )
 target_include_directories(unit_google_tests PRIVATE "${CMAKE_SOURCE_DIR}/src")
 
 # Линковка
 target_link_libraries(unit_google_tests PRIVATE 
 	gtest 
-	gtest_main 
-	helloworld
+	gtest_main
+	editor_tool
 )
 
 # Установка стандартов

@@ -28,6 +28,7 @@ void DocumentModel::removePrimitive(std::shared_ptr<GraphicPrimitive> primitive)
     );
 }
 
-const std::vector<std::shared_ptr<GraphicPrimitive>>& DocumentModel::getPrimitives() const {
+const std::vector<std::shared_ptr<GraphicPrimitive>>& DocumentModel::getPrimitives() const
+{
     return primitives_;
 }
