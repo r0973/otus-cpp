@@ -11,11 +11,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y graphviz cmake build-essential
+
     # Build the HTML documentation
     - name: Doxygen Action
-      uses: mattnotmitt/doxygen-action@v1.1.0
+      uses: mattnotmitt/doxygen-action@v1.9.0
       with:
           doxyfile-path: ./Doxyfile
           working-directory: .
@@ -27,6 +32,7 @@ jobs:
         github_token: ${{ secrets.GITHUB_TOKEN }}
         publish_dir: ./docs/html/
         enable_jekyll: false
+        keep_files: false
         allow_empty_commit: false
         force_orphan: true
         publish_branch: gh-pages
