@@ -4,11 +4,6 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/googletest
 	EXCLUDE_FROM_ALL
 )
 
-# Добавляем директорию сборки для version.h
-target_include_directories(editor_tool
-    PUBLIC ${CMAKE_SOURCE_DIR}/include
-)
-
 # Создание тестового исполняемого файла
 add_executable(unit_google_tests 
 	test_main_gtest.cpp
@@ -18,8 +13,11 @@ add_executable(unit_google_tests
 	test_document_view.cpp
 	test_primitives.cpp
 )
-target_include_directories(unit_google_tests PRIVATE "${CMAKE_SOURCE_DIR}/src")
-
+# Добавляем директории с заголовочными файлами
+target_include_directories(unit_google_tests PRIVATE 
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_BINARY_DIR}/src
+)
 # Линковка
 target_link_libraries(unit_google_tests PRIVATE 
 	gtest 
