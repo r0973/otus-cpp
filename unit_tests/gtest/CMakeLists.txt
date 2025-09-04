@@ -1,9 +1,12 @@
 # Указываем полный путь к исходникам и бинарной директории
 add_subdirectory(${CMAKE_SOURCE_DIR}/googletest 
 	${CMAKE_BINARY_DIR}/googletest
-	# ${CMAKE_BINARY_DIR}/src  # для version.h
-    # ${CMAKE_SOURCE_DIR}/include
 	EXCLUDE_FROM_ALL
+)
+
+# Добавляем директорию сборки для version.h
+target_include_directories(editor_tool
+    PUBLIC ${CMAKE_SOURCE_DIR}/include
 )
 
 # Создание тестового исполняемого файла
