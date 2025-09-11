@@ -5,40 +5,55 @@
  */
 
 #pragma once
+#include <map>
 
-
-template<typename T>
-class Row {
+template<typename T, T DefaultValue = T{}>
+class Row
+{
 private:
-    std::map<size_t, T> row_;
+    mutable std::map<std::size_t, T> row_;
 
 public:
-    T& operator[](size_t col) {
-        return row_[col];
-    }
+    class ProxyRow
+    {
+    private:
+        Row& row_;
+        std::size_t col_;
 
-    const T operator[](size_t col) const {
-        auto it = row_.find(col);
-        if (it != row_.end()) {
-            return it->second;
+    public:
+        ProxyRow(Row& row, std::size_t col)
+        : row_(row)
+        , col_(col)
+        {}
+
+        operator T() const
+        {
+            auto it = row_.row_.find(col_);
+            return it != row_.row_.end() ? it->second : DefaultValue;
         }
-        return T(); // Возвращаем значение по умолчанию для типа T
+
+        ProxyRow& operator=(const T& value)
+        {
+            if (value == DefaultValue)
+            {
+                row_.row_.erase(col_);
+            }
+            else
+            {
+                row_.row_[col_] = value;
+            }
+            return *this;
+        }
+    };
+
+    ProxyRow operator[](std::size_t col)
+    {
+        return ProxyRow{*this, col};
     }
 
-    size_t size() const {
-        return row_.size();
-    }
-
-    void clear() {
-        row_.clear();
-    }
-
-    // Итератор для обхода занятых ячеек в строке
-    auto begin() const {
-        return row_.begin();
-    }
-
-    auto end() const {
-        return row_.end();
-    }
+    // const Row& row() const { return row_; } 
+    std::size_t size() const { return row_.size(); }
+    bool empty() const { return row_.empty(); }
+    auto begin() const { return row_.begin(); }
+    auto end() const { return row_.end(); }
 };

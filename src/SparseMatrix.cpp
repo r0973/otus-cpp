@@ -1,2 +1,2 @@
-#include "matrix.h"
+#include "SparseMatrix.h"
 
