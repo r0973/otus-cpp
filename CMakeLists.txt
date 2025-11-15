@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
-project(helloworld_cli VERSION ${PROJECT_VESRION})
+project(matrix VERSION ${PROJECT_VESRION})
 
 option(WITH_BOOST_TEST "Whether to build Boost test" OFF)
 option(WITH_GOOGLE_TEST "Whether to build Google test" ON)
@@ -16,11 +16,13 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "Install path prefix" FORCE)
 endif()
 
+# unit_tests/CMakeLists.txt
+enable_testing()
+
 # Добавление поддиректорий
 add_subdirectory(src)
 
 if(WITH_GOOGLE_TEST OR WITH_BOOST_TEST)
-    enable_testing()
     add_subdirectory(unit_tests)
 endif()
 
