@@ -1,12 +1,13 @@
-#include "lib_version.h"
-#include "SparseMatrix.h"
 #include <type_traits>
 #include <iostream>
+#include "lib_version.h"
+#include "SparseMatrix.h"
+
 
 int main(int, char **)
 {
 	SparseMatrix<int, 0> matrix;
-    assert(matrix.size() == 0); // all cells are free
+    assert(matrix.size() == 0);
     auto a = matrix[0][0];
     assert(a == 0);
     assert(matrix.size() == 0);
