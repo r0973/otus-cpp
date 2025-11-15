@@ -5,29 +5,44 @@
 
 int main(int, char **)
 {
-	std::cout << "Version: " << version() << std::endl;
-	constexpr int DefaultValue = -1;
-    using Matrix = SparseMatrix<std::remove_const_t<decltype(DefaultValue)>, DefaultValue>;
-	// бесконечная матрица int заполнена значениями -1  
-	Matrix matrix;  
-	assert(matrix.size() == 0); // все ячейки свободны  
-	auto a = matrix[0][0];  
-	assert(a == DefaultValue);  
-	assert(matrix.size() == 0);  
+	SparseMatrix<int, 0> matrix;
+    assert(matrix.size() == 0); // all cells are free
+    auto a = matrix[0][0];
+    assert(a == 0);
+    assert(matrix.size() == 0);
 
-	matrix[100][100] = 314;
-	assert(matrix[100][100] == 314);
-    std::cout << "matrix[100][100] = " << matrix[100][100] << "\n";
-	assert(matrix.size() == 1);
+    // Filling the main diagonal
+    std::size_t n = 10;
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        matrix[i][i] = i;
+    }
 
-	// выведется одна строка  
-	// 100100314  
-	for(auto c : matrix)  
-	{  
-		int x;  
-		int y;  
-		int v;  
-		std::tie(x, y, v) = c;  
-		std::cout << x << y << v << std::endl;  
-	}
+    // Filling the secondary diagonal
+    for (std::size_t i = 0; i < n; ++i)
+    {
+        matrix[i][n - 1 -  i] = n - 1 - i;
+    }
+
+    // Printing a fragment of the matrix from [1,1] to [8,8]
+    for (std::size_t i = 1; i < n - 1; ++i)
+    {
+        for (std::size_t j = 1; j < n - 1; ++j)
+        {
+            std::cout << matrix[i][j] << " ";
+        }
+        std::cout << "\n";
+    }
+
+    assert(matrix.size() == 18);
+    std::cout << "Number of nonzero cells: " << matrix.size() << "\n";
+
+    // Printing all occupied cells
+    for (auto elem : matrix)
+    {
+        auto [i, j, value] = elem;
+        std::cout << i << " " << j << " " << value << "\n";
+    }
+
+    return 0;
 }
