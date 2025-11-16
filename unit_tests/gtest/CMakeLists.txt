@@ -8,14 +8,22 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/googletest
 add_executable(unit_google_tests 
 	test_main_gtest.cpp
 	test_version.cpp
+	test_SparseMatrix.cpp
+	test_MatrixRow.cpp
+	test_MatrixIterator.cpp
 )
-target_include_directories(unit_google_tests PRIVATE "${CMAKE_SOURCE_DIR}/src")
+
+# Добавляем директории с заголовочными файлами
+target_include_directories(unit_google_tests PRIVATE 
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_BINARY_DIR}/src
+)
 
 # Линковка
 target_link_libraries(unit_google_tests PRIVATE 
 	gtest 
 	gtest_main 
-	helloworld
+	matrix_tool
 )
 
 # Установка стандартов
