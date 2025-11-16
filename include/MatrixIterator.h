@@ -1,4 +1,11 @@
 /**
+ * @file MatrixIterator.h
+ * @brief \en Class for matrix iterator.
+ *        \ru Класс для итератора матрицы.
+ */
+#pragma once
+
+/**
  * @brief \en Iterator for traversing non-zero elements of a sparse matrix.
  *        \ru Итератор для обхода ненулевых элементов разреженной матрицы.
  */
@@ -49,18 +56,43 @@ private:
 
 public:
     /**
-     * @brief \en Checks if two iterators are not equal.
-     *        \ru Проверяет, не равны ли два итератора.
-     * @param other \en Another iterator to compare with.
-     *                \ru Другой итератор для сравнения.
-     * @return \en True if iterators are not equal, false otherwise.
-     *         \ru True, если итераторы не равны, иначе false.
-     */
-    bool operator!=(const SparseMatrixIterator& other) const noexcept
-    {
-        return m_rowIt != other.m_rowIt;
-    }
+	 * @brief \en Checks if two iterators are equal.
+	 *        \ru Проверяет, равны ли два итератора.
+	 * @param other \en Another iterator to compare with.
+	 *              \ru Другой итератор для сравнения.
+	 * @return \en True if iterators are equal, false otherwise.
+	 *         \ru True, если итераторы равны, иначе false.
+	 */
+	bool operator==(const SparseMatrixIterator& other) const noexcept
+	{
+		if (m_rowIt != other.m_rowIt)
+		{
+        	return false; // Different rows - not equal.
+    	}
+    	
+		if (m_rowIt == m_rowEnd)
+		{
+			return true; // Both at end - equal.
+		}
+		
+		return m_colIt == other.m_colIt; // Same row - compare columns.
+	}
 
+public:
+	/**
+	 * @brief \en Checks if two iterators are not equal.
+	 *        \ru Проверяет, не равны ли два итератора.
+	 * @param other \en Another iterator to compare with.
+	 *              \ru Другой итератор для сравнения.
+	 * @return \en True if iterators are not equal, false otherwise.
+	 *         \ru True, если итераторы не равны, иначе false.
+	 */
+	bool operator!=(const SparseMatrixIterator& other) const noexcept
+	{
+		return !(*this == other);
+	}
+
+public:
     /**
      * @brief \en Dereferences the iterator to get the current element as a tuple (row, column, value).
      *        \ru Разъименовывает итератор, чтобы получить текущий элемент в виде кортежа (строка, столбец, значение).

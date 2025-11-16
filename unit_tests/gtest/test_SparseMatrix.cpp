@@ -1,7 +1,5 @@
 #include <gtest/gtest.h>
 #include <SparseMatrix.h>
-#include <gtest/gtest.h>
-#include <SparseMatrix.h>
 
 
 TEST(SparseMatrixTest, DefaultConstruction)

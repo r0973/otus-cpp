@@ -5,23 +5,27 @@
  */
 
 #pragma once
+
 #include <map>
 
 /**
- * @class Row
+ * @class MatrixRow
  * @brief \en A class representing a sparse matrix row with a default value.
  *        \ru Класс, представляющий разреженную строку матрицы с значением по умолчанию.
  * @tparam T \en Type of elements in the row.
  *           \ru Тип элементов в строке.
- * @tparam DefaultValue \en Default value for elements not explicitly set.
- *                      \ru Значение по умолчанию для элементов, которые не установлены явно.
  */
-template<typename T, T DefaultValue = T{}>
-class Row
+template<typename T>
+class MatrixRow
 {
-private:
+protected:
+    T defaultValue; ///< \en Default value for elements not explicitly set. \ru Значение по умолчанию для элементов, которые не установлены явно.
     std::map<std::size_t, T> row_; ///< \en Internal storage for row elements. \ru Внутреннее хранилище для элементов строки.
 
+public:
+    explicit MatrixRow(T defaultValue_ = T{})
+        : defaultValue{defaultValue_}
+    {}
 public:
     /**
      * @class ProxyRow
@@ -31,7 +35,7 @@ public:
     class ProxyRow
     {
     private:
-        Row& row_; ///< \en Reference to the parent row. \ru Ссылка на родительскую строку.
+        MatrixRow& row_; ///< \en Reference to the parent row. \ru Ссылка на родительскую строку.
         std::size_t col_; ///< \en Column index. \ru Индекс столбца.
 
     public:
@@ -43,7 +47,7 @@ public:
          * @param col \en Column index.
          *            \ru Индекс столбца.
          */
-        ProxyRow(Row& row, std::size_t col) noexcept
+        ProxyRow(MatrixRow& row, std::size_t col) noexcept
             : row_(row)
             , col_(col)
         {}
@@ -51,13 +55,13 @@ public:
         /**
          * @brief \en Conversion operator to return the value at the specified column.
          *        \ru Оператор преобразования для возврата значения в указанном столбце.
-         * @return \en Value at the specified column or DefaultValue if not set.
-         *         \ru Значение в указанном столбце или DefaultValue, если не установлено.
+         * @return \en Value at the specified column or defaultValue if not set.
+         *         \ru Значение в указанном столбце или defaultValue, если не установлено.
          */
         operator T() const noexcept
         {
             auto it = row_.row_.find(col_);
-            return it != row_.row_.end() ? it->second : DefaultValue;
+            return it != row_.row_.end() ? it->second : row_.defaultValue;
         }
 
         /**
@@ -70,7 +74,7 @@ public:
          */
         ProxyRow& operator=(const T& value) noexcept
         {
-            if (value == DefaultValue)
+            if (value == row_.defaultValue)
             {
                 row_.row_.erase(col_);
             }

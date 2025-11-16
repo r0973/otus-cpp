@@ -6,7 +6,7 @@
 
 int main(int, char **)
 {
-	SparseMatrix<int, 0> matrix;
+	SparseMatrix<int> matrix{0};
     assert(matrix.size() == 0);
     auto a = matrix[0][0];
     assert(a == 0);
