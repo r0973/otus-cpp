@@ -2,7 +2,9 @@
 configure_file(version.h.in version.h @ONLY)
 
 # Основная библиотека
-add_library(matrix_tool lib_version.cpp)
+add_library(matrix_tool
+    lib_version.cpp
+    SparseMatrix.cpp)
 
 # Добавляем директорию сборки для version.h
 target_include_directories(matrix_tool
