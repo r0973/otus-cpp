@@ -3,7 +3,7 @@ set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
 project(matrix VERSION ${PROJECT_VESRION})
 
-option(WITH_BOOST_TEST "Whether to build Boost test" OFF)
+option(WITH_BOOST_TEST "Whether to build Boost test" ON)
 option(WITH_GOOGLE_TEST "Whether to build Google test" ON)
 
 # Установка выходных директорий
@@ -22,8 +22,22 @@ enable_testing()
 # Добавление поддиректорий
 add_subdirectory(src)
 
+# Создаем общую тестовую цель заранее
+if(WITH_GOOGLE_TEST OR WITH_BOOST_TEST)
+    add_custom_target(all_tests COMMENT "Test executables will be added as dependencies")
+endif()
+
 if(WITH_GOOGLE_TEST OR WITH_BOOST_TEST)
     add_subdirectory(unit_tests)
+endif()
+
+# Добавляем зависимости после того как цели созданы в поддиректории
+if(WITH_GOOGLE_TEST AND WITH_BOOST_TEST)
+    add_dependencies(all_tests unit_google_tests unit_boost_tests)
+elseif(WITH_GOOGLE_TEST)
+    add_dependencies(all_tests unit_google_tests)
+elseif(WITH_BOOST_TEST)
+    add_dependencies(all_tests unit_boost_tests)
 endif()
 
 # Настройка CPack

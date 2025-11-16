@@ -28,9 +28,9 @@ else()
 endif()
 
 # Установка цели
-install(TARGETS unit_boost_tests
-    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-)
+# install(TARGETS unit_boost_tests
+#     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+# )
 
 # Настройка тестов
 enable_testing()
