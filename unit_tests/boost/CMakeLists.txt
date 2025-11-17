@@ -2,6 +2,16 @@ find_package(Boost COMPONENTS unit_test_framework REQUIRED)
 
 add_executable(unit_boost_tests test_version.cpp)
 
+# Добавляем директории с заголовочными файлами
+target_include_directories(unit_boost_tests PRIVATE 
+    ${Boost_INCLUDE_DIRS}
+    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_BINARY_DIR}/src
+)
+
+# Линковка
+target_link_libraries(unit_boost_tests ${Boost_LIBRARIES} helloworld)
+
 # Установка стандартов
 set_target_properties(unit_boost_tests PROPERTIES
     CXX_STANDARD 17
@@ -10,13 +20,6 @@ set_target_properties(unit_boost_tests PROPERTIES
 
 # Настройка Boost Test
 target_compile_definitions(unit_boost_tests PRIVATE BOOST_TEST_DYN_LINK)
-target_include_directories(
-    unit_boost_tests
-    PRIVATE
-        "${Boost_INCLUDE_DIRS}"
-        "${CMAKE_SOURCE_DIR}/src"
-)
-target_link_libraries(unit_boost_tests ${Boost_LIBRARIES} helloworld)
 
 # Установка опций компилятора
 if (MSVC)
@@ -26,9 +29,9 @@ else()
 endif()
 
 # Установка цели
-install(TARGETS unit_boost_tests
-    RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-)
+# install(TARGETS unit_boost_tests
+#     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+# )
 
 # Настройка тестов
 enable_testing()

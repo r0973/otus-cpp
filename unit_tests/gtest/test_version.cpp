@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 
 // Тестовый случай для проверки валидности версии
-TEST(TestVersion, test_valid_version) {
+TEST(TestVersion, TestValidVersion)
+{
     EXPECT_GT(version(), 0);
 }

@@ -4,8 +4,7 @@ configure_file(version.h.in version.h @ONLY)
 # Основная библиотека
 add_library(helloworld lib_version.cpp)
 target_include_directories(helloworld
-    PRIVATE "${CMAKE_BINARY_DIR}"
-    PRIVATE "${CMAKE_BINARY_DIR}/src"
+    PRIVATE "${CMAKE_BINARY_DIR}/src" # для version.h
     PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
