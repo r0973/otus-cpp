@@ -10,7 +10,7 @@ target_include_directories(unit_boost_tests PRIVATE
 )
 
 # Линковка
-target_link_libraries(unit_boost_tests ${Boost_LIBRARIES} helloworld)
+target_link_libraries(unit_boost_tests ${Boost_LIBRARIES} bulk_tool)
 
 # Установка стандартов
 set_target_properties(unit_boost_tests PROPERTIES

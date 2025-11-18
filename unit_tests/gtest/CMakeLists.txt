@@ -20,7 +20,7 @@ target_include_directories(unit_google_tests PRIVATE
 target_link_libraries(unit_google_tests PRIVATE 
 	gtest 
 	gtest_main 
-	helloworld
+	bulk_tool
 )
 
 # Установка стандартов
