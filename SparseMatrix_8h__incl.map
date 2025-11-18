@@ -1,0 +1,16 @@
+<map id="include/SparseMatrix.h" name="include/SparseMatrix.h">
+<area shape="rect" id="Node000001" title="\en" alt="" coords="141,5,293,31"/>
+<area shape="rect" id="Node000002" title=" " alt="" coords="5,79,77,105"/>
+<area shape="poly" id="edge1_Node000001_Node000002" title=" " alt="" coords="188,34,86,75,84,70,186,29"/>
+<area shape="rect" id="Node000003" title=" " alt="" coords="214,153,260,178"/>
+<area shape="poly" id="edge2_Node000001_Node000003" title=" " alt="" coords="193,34,171,47,151,64,139,84,139,93,142,103,153,118,168,131,200,149,198,154,164,135,149,122,137,106,133,94,134,82,147,61,168,43,190,29"/>
+<area shape="rect" id="Node000004" title=" " alt="" coords="152,79,202,105"/>
+<area shape="poly" id="edge3_Node000001_Node000004" title=" " alt="" coords="213,33,193,67,189,64,208,30"/>
+<area shape="rect" id="Node000005" title=" " alt="" coords="226,79,290,105"/>
+<area shape="poly" id="edge4_Node000001_Node000005" title=" " alt="" coords="226,30,246,64,241,67,222,33"/>
+<area shape="rect" id="Node000006" href="$MatrixRow_8h.html" title="\en Class for matrix row storage. \ru Класс для хранения строки матрицы." alt="" coords="315,79,407,105"/>
+<area shape="poly" id="edge5_Node000001_Node000006" title=" " alt="" coords="243,29,324,69,322,74,240,34"/>
+<area shape="rect" id="Node000007" href="$MatrixIterator_8h.html" title="\en Class for matrix iterator. \ru Класс для итератора матрицы." alt="" coords="431,79,539,105"/>
+<area shape="poly" id="edge7_Node000001_Node000007" title=" " alt="" coords="263,29,425,72,424,77,262,34"/>
+<area shape="poly" id="edge6_Node000006_Node000003" title=" " alt="" coords="341,108,272,147,270,142,339,103"/>
+</map>
