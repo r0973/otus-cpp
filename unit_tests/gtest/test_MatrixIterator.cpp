@@ -32,7 +32,8 @@ TEST(SparseMatrixIteratorTest, SingleElement)
     EXPECT_EQ(it, end);
 }
 
-TEST(SparseMatrixIteratorTest, MultipleElementsSameRow) {
+TEST(SparseMatrixIteratorTest, MultipleElementsSameRow)
+{
     SparseMatrix<int> matrix;
     matrix[0][1] = 10;
     matrix[0][3] = 30;
@@ -180,26 +181,6 @@ TEST(SparseMatrixIteratorTest, IncrementOnEndIterator)
     ++it; // Should not crash or change behavior
     
     EXPECT_EQ(it, original_it);
-}
-
-TEST(SparseMatrixIteratorTest, StringValueType)
-{
-    SparseMatrix<std::string> matrix;
-    matrix[1][2] = "hello";
-    matrix[3][4] = "world";
-    
-    auto it = matrix.begin();
-    auto end = matrix.end();
-    
-    std::vector<std::tuple<size_t, size_t, std::string>> elements;
-    for (; it != end; ++it)
-	{
-        elements.push_back(*it);
-    }
-    
-    EXPECT_EQ(elements.size(), 2);
-    EXPECT_EQ(std::get<2>(elements[0]), "hello");
-    EXPECT_EQ(std::get<2>(elements[1]), "world");
 }
 
 TEST(SparseMatrixIteratorTest, DoubleValueType)

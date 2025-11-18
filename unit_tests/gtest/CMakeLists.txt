@@ -28,7 +28,7 @@ target_link_libraries(unit_google_tests PRIVATE
 
 # Установка стандартов
 set_target_properties(unit_google_tests PROPERTIES
-	CXX_STANDARD 17
+	CXX_STANDARD 20
 	CXX_STANDARD_REQUIRED ON
 )
 

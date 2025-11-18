@@ -15,17 +15,12 @@
  * @tparam T \en Type of elements in the row.
  *           \ru Тип элементов в строке.
  */
-template<typename T>
+template<typename T, T defaultValue = T{}>
 class MatrixRow
 {
 protected:
-    T defaultValue; ///< \en Default value for elements not explicitly set. \ru Значение по умолчанию для элементов, которые не установлены явно.
     std::map<std::size_t, T> row_; ///< \en Internal storage for row elements. \ru Внутреннее хранилище для элементов строки.
 
-public:
-    explicit MatrixRow(T defaultValue_ = T{})
-        : defaultValue{defaultValue_}
-    {}
 public:
     /**
      * @class ProxyRow
@@ -61,7 +56,7 @@ public:
         operator T() const noexcept
         {
             auto it = row_.row_.find(col_);
-            return it != row_.row_.end() ? it->second : row_.defaultValue;
+            return it != row_.row_.end() ? it->second : defaultValue;
         }
 
         /**
@@ -74,7 +69,7 @@ public:
          */
         ProxyRow& operator=(const T& value) noexcept
         {
-            if (value == row_.defaultValue)
+            if (value == defaultValue)
             {
                 row_.row_.erase(col_);
             }

@@ -34,7 +34,11 @@ public:
         : m_rowIt(rowBeg)
         , m_rowEnd(rowEnd)
     {
-        SkipEmptyRows();
+        if (m_rowIt != m_rowEnd)
+        {
+            m_colIt = m_rowIt->second.begin();
+            SkipEmptyRows();
+        }
     }
 
 private:

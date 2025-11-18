@@ -13,7 +13,7 @@ TEST(MatrixRowTest, DefaultConstruction)
 
 TEST(MatrixRowTest, ConstructionWithDefaultValue)
 {
-    MatrixRow<int> row{42};
+    MatrixRow<int, 42> row{};
     EXPECT_EQ(row.size(), 0);
     EXPECT_EQ(row[0], 42);
     EXPECT_EQ(row[999], 42);
@@ -35,7 +35,7 @@ TEST(MatrixRowTest, AssignmentOperator)
 
 TEST(MatrixRowTest, AssignmentWithDefaultValueRemoval)
 {
-    MatrixRow<int> row{100};
+    MatrixRow<int,100> row{};
     
     // Set non-default value
     row[3] = 50;
@@ -102,7 +102,8 @@ TEST(MatrixRowTest, Iteration)
     std::size_t count = 0;
     for (const auto& [col, value] : row)
     {
-        switch (col) {
+        switch (col)
+        {
             case 1: EXPECT_EQ(value, 10); break;
             case 3: EXPECT_EQ(value, 30); break;
             case 5: EXPECT_EQ(value, 50); break;
@@ -113,26 +114,9 @@ TEST(MatrixRowTest, Iteration)
     EXPECT_EQ(count, 3);
 }
 
-TEST(MatrixRowTest, StringType)
-{
-    MatrixRow<std::string> row{"default"};
-    
-    EXPECT_EQ(static_cast<std::string>(row[0]), "default");
-    EXPECT_EQ(static_cast<std::string>(row[100]), "default");
-    
-    row[1] = "hello";
-    EXPECT_EQ(row.size(), 1);
-    EXPECT_EQ(static_cast<std::string>(row[1]), "hello");
-    EXPECT_EQ(static_cast<std::string>(row[2]), "default");
-    
-    row[1] = "default"; // set back to default
-    EXPECT_EQ(row.size(), 0);
-    EXPECT_EQ(static_cast<std::string>(row[1]), "default");
-}
-
 TEST(MatrixRowTest, DoubleType)
 {
-    MatrixRow<double> row{3.14};
+    MatrixRow<double,3.14> row{};
     
     EXPECT_DOUBLE_EQ(row[0], 3.14);
     EXPECT_DOUBLE_EQ(row[100], 3.14);

@@ -12,7 +12,7 @@ TEST(SparseMatrixTest, DefaultConstruction)
 
 TEST(SparseMatrixTest, ConstructionWithDefaultValue)
 {
-    SparseMatrix<int> matrix(42);
+    SparseMatrix<int, 42> matrix;
     EXPECT_EQ(matrix.size(), 0);
     EXPECT_EQ(matrix[0][0], 42);
     EXPECT_EQ(matrix[5][10], 42);
@@ -46,7 +46,7 @@ TEST(SparseMatrixTest, ElementOverwrite)
 
 TEST(SparseMatrixTest, DefaultValueRemoval)
 {
-    SparseMatrix<int> matrix(100);
+    SparseMatrix<int,100> matrix;
     
     matrix[1][2] = 50;
     EXPECT_EQ(matrix.size(), 1);
@@ -98,24 +98,9 @@ TEST(SparseMatrixTest, ConstAccess)
     EXPECT_EQ(const_matrix[0][0], 0); // Default value for unset element
 }
 
-TEST(SparseMatrixTest, StringType)
-{
-    SparseMatrix<std::string> matrix("default");
-    
-    EXPECT_EQ(static_cast<std::string>(matrix[0][0]), "default");
-    
-    matrix[1][2] = "hello";
-    EXPECT_EQ(matrix.size(), 1);
-    EXPECT_EQ(static_cast<std::string>(matrix[1][2]), "hello");
-    
-    matrix[1][2] = "default"; // Set back to default
-    EXPECT_EQ(matrix.size(), 0);
-    EXPECT_EQ(static_cast<std::string>(matrix[1][2]), "default");
-}
-
 TEST(SparseMatrixTest, DoubleType)
 {
-    SparseMatrix<double> matrix(3.14);
+    SparseMatrix<double,3.14> matrix;
     
     EXPECT_DOUBLE_EQ(matrix[0][0], 3.14);
     
@@ -185,7 +170,8 @@ TEST(SparseMatrixTest, IteratorTraversal)
     auto end = matrix.end();
     
     size_t count = 0;
-    while (it != end) {
+    while (it != end)
+    {
         ++count;
         ++it;
     }
@@ -210,7 +196,7 @@ TEST(SparseMatrixTest, SparseStorage)
 
 TEST(SparseMatrixTest, ZeroDefaultValue)
 {
-    SparseMatrix<int> matrix(0); // Default value is 0
+    SparseMatrix<int, 0> matrix; // Default value is 0
     
     matrix[1][2] = 10;
     EXPECT_EQ(matrix.size(), 1);

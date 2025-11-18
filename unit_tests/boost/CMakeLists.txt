@@ -13,7 +13,7 @@ target_link_libraries(unit_boost_tests ${Boost_LIBRARIES} matrix_tool)
 
 # Установка стандартов
 set_target_properties(unit_boost_tests PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 20
     CXX_STANDARD_REQUIRED ON
 )
 
