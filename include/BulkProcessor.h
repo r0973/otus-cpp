@@ -15,24 +15,23 @@ private:
     std::vector<Command> commands;
 
 public:
-    BulkProcessor(size_t bulkSize)
-		: bulkSize{bulkSize}
+    explicit BulkProcessor(size_t blockSize_)
+		: bulkSize{blockSize_}
 		, isDynamicBlock{false}
 		, nestingLevel{0}
 	{}
 
 public:
-    ~BulkProcessor()
+	void Finish()
 	{
-        if (isDynamicBlock)
+		if (!isDynamicBlock && !commands.empty())
 		{
-            commands.clear();
-        }
-		else
-		{
-            flushBulk();
-        }
-    }
+			flushBulk();
+		}
+	}
+public:
+    ~BulkProcessor()
+	{}
 
 private:
     void flushBulk()
@@ -47,30 +46,44 @@ private:
 public:
     void ProcessCommand(const Command& cmd)
 	{
-        if (cmd.getCmd() == "{")
+		if (cmd.getCmd().empty())
+			return;
+
+		if (cmd.getCmd() == "{")
 		{
-            if (!isDynamicBlock)
+			if (!isDynamicBlock)
 			{
-                flushBulk();
-                isDynamicBlock = true;
-            }
-            nestingLevel++;
-        }
-        else if (cmd.getCmd() == "}")
+				flushBulk();
+				isDynamicBlock = true;
+			}
+			nestingLevel++;
+			return;
+		}
+		else if (cmd.getCmd() == "}")
 		{
-            if (isDynamicBlock && --nestingLevel == 0)
+			if (isDynamicBlock && --nestingLevel == 0)
 			{
-                flushBulk();
-                isDynamicBlock = false;
-            }
-        }
-        else
+				flushBulk();
+				isDynamicBlock = false;
+			}
+			return;
+		}
+
+		if (cmd.getCmd() != "EOF")
 		{
-            commands.push_back(cmd);
-            if (!isDynamicBlock && commands.size() >= bulkSize)
+			if (isDynamicBlock)
 			{
-                flushBulk();
-            }
-        }
-    }
+				commands.push_back(cmd);
+			}
+			else if (bulkSize > 0)
+			{
+				commands.push_back(cmd);
+				
+				if (commands.size() >= bulkSize)
+				{
+					flushBulk();
+				}
+			}
+		}
+	}
 };

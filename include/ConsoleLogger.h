@@ -12,15 +12,15 @@ public:
 public:
     void update(const std::vector<Command>& commands) override
 	{
-        std::cout << "bulk: ";
-        for (size_t i = 0; i < commands.size(); ++i)
+		std::cout << "bulk: ";
+		for (size_t i = 0; i < commands.size(); ++i)
 		{
-            std::cout << commands[i].getCmd();
-            if (i != commands.size() - 1)
+			std::cout << commands[i].getCmd();
+			if (i != commands.size() - 1)
 			{
-                std::cout << ", ";
-            }
-        }
-        std::cout << std::endl;
+				std::cout << ", ";
+			}
+		}
+		std::cout << std::endl;
     }
 };
