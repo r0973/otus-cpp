@@ -14,16 +14,16 @@ int main(int argc, char* argv[])
         return 1;
     }
 
-    int bulkSize = 0;
     try
     {
-        bulkSize = std::stoi(argv[1]);
+        auto bulkSize = std::stoi(argv[1]);
+        
         if (bulkSize < 0)
         {
             std::cerr << "Error: <bulk_size> must be a positive integer" << std::endl;
             return 1;
         }
-                
+
         BulkProcessor processor{static_cast<size_t>(bulkSize)};
 
         auto consoleLogger = std::make_shared<ConsoleLogger>();
