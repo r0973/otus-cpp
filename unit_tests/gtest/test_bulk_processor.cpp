@@ -206,3 +206,26 @@ TEST(BulkProcessor, StaticBlockN1)
     std::string expected = "bulk: cmd1\nbulk: cmd2\nbulk: cmd3\n";
     EXPECT_EQ(expected, output);
 }
+
+TEST(BulkProcessor, CompositeCommandsWithSpaces)
+{
+    ConsoleOutputCapture capture;
+
+    size_t N = 3;
+    BulkProcessor processor{N};
+    auto consoleLogger = std::make_shared<ConsoleLogger>();
+    processor.attach(consoleLogger);
+
+    std::string line;
+    std::stringstream input("cmd1 asdf asdf\ncmd2\n");
+    while (std::getline(input, line))
+    {
+        processor.ProcessCommand(Command{line});
+    }
+    processor.Finish();
+
+    std::string output = capture.getOutput();
+    std::string expected = "bulk: cmd1 asdf asdf, cmd2\n";
+
+    EXPECT_EQ(output, expected);
+}
