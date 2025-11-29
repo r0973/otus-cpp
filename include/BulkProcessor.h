@@ -29,9 +29,9 @@ public:
 			flushBulk();
 		}
 	}
+
 public:
-    ~BulkProcessor()
-	{}
+    ~BulkProcessor() = default;
 
 private:
     void flushBulk()
@@ -43,6 +43,61 @@ private:
         }
     }
 
+private:
+	    void processControlCommand(const Command& cmd)
+    {
+        if (cmd.isBlockStart())
+		{
+            if (!isDynamicBlock)
+			{
+                flushBulk();
+                isDynamicBlock = true;
+            }
+            nestingLevel++;
+        } 
+        else if (cmd.isBlockEnd())
+		{
+            if (isDynamicBlock && --nestingLevel == 0)
+			{
+                flushBulk();
+                isDynamicBlock = false;
+            }
+        }
+    }
+
+private:
+    void processRegularCommand(const Command& cmd)
+    {
+        if (isDynamicBlock)
+		{
+            commands.push_back(cmd);
+        }
+        else if (bulkSize > 0)
+		{
+            commands.push_back(cmd);
+            if (commands.size() >= bulkSize)
+			{
+                flushBulk();
+            }
+        }
+        // Если bulkSize == 0 и не в динамическом блоке - команда игнорируется
+    }
+
+public:
+    void ProcessCommand(const Command& cmd)
+	{
+		if (cmd.empty() || cmd.isEOF())
+			return;
+
+		if (cmd.isControlCommand())
+		{
+			processControlCommand(cmd);
+			return;
+		}
+
+		processRegularCommand(cmd);
+	}
+/*
 public:
     void ProcessCommand(const Command& cmd)
 	{
@@ -86,4 +141,5 @@ public:
 			}
 		}
 	}
+*/
 };

@@ -9,6 +9,7 @@ add_executable(unit_google_tests
 	test_main_gtest.cpp
 	test_version.cpp
 	test_bulk_processor.cpp
+	test_command.cpp
 )
 
 # Добавляем директории с заголовочными файлами
