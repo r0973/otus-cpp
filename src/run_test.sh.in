@@ -1,0 +1,49 @@
+#!/bin/bash
+
+# --- Настройка путей ---
+BULK_EXECUTABLE="@CMAKE_INSTALL_PREFIX@/bin/bulk"
+
+# Добавляем путь к каталогу библиотек в LD_LIBRARY_PATH
+export LD_LIBRARY_PATH="@CMAKE_INSTALL_PREFIX@/lib:$LD_LIBRARY_PATH"
+
+# --- Подготовка: Очистка предыдущих логов и данных ---
+rm -f bulk*.log console_client*.log input_client*.txt
+
+echo "--- Запуск расширенного теста с двумя параллельными клиентами ---"
+
+# --- Клиент 1: bulk size 3, 5 команд ---
+echo -e "C1_cmd1\nC1_cmd2\nC1_cmd3\nC1_cmd4\nC1_cmd5\nEOF\n" > input_client1.txt
+echo "Запуск Клиента 1 (bulk 3)..."
+${BULK_EXECUTABLE} 3 < input_client1.txt > console_client1.log 2>&1 &
+PID1=$!
+
+# --- Клиент 2: bulk size 2, 6 команд ---
+echo -e "C2_a\nC2_b\nC2_c\nC2_d\nC2_e\nC2_f\nEOF\n" > input_client2.txt
+echo "Запуск Клиента 2 (bulk 2)..."
+${BULK_EXECUTABLE} 2 < input_client2.txt > console_client2.log 2>&1 &
+PID2=$!
+
+echo "Оба клиента запущены параллельно. Ожидание завершения..."
+
+# --- Ожидание завершения обоих процессов ---
+wait $PID1
+wait $PID2
+echo "Оба клиента завершили работу."
+
+# --- Анализ результатов ---
+echo "--- Анализ консольного вывода ---"
+cat console_client1.log
+echo "-------------------"
+echo "Консоль Клиента 2:"
+cat console_client2.log
+echo "-------------------"
+
+echo "--- Анализ файлов логов ---"
+ls -l bulk*.log
+echo "--- Содержимое файлов логов ---"
+for file in bulk*.log; do
+    echo "--- $file ---"
+    cat "$file"
+done
+
+echo "--- Тест завершен ---"
