@@ -2,36 +2,28 @@
 configure_file(version.h.in version.h @ONLY)
 
 # Основная библиотека
-add_library(helloworld lib_version.cpp)
-target_include_directories(helloworld
-    PRIVATE "${CMAKE_BINARY_DIR}/src" # для version.h
-    PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}"
+add_library(async SHARED)
+
+# Добавляем директорию сборки для version.h
+target_include_directories(async 
+    PUBLIC ${PROJECT_INCLUDE_DIRS}
+)
+
+target_sources(async PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}/mt/Dispatcher.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/async/async.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/lib_version.cpp
 )
 
 # Исполняемый файл
-add_executable(helloworld_cli main.cpp)
-
-# Установка стандартов
-set_target_properties(helloworld_cli helloworld PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED ON
-)
+add_executable(bulk main.cpp)
 
 # Линковка
-target_link_libraries(helloworld_cli PRIVATE helloworld)
-
-# Установка опций компилятора
-if (MSVC)
-    target_compile_options(helloworld_cli PRIVATE /W4)
-    target_compile_options(helloworld PRIVATE /W4)
-else()
-    target_compile_options(helloworld_cli PRIVATE -Wall -Wextra -pedantic -Werror)
-    target_compile_options(helloworld PRIVATE -Wall -Wextra -pedantic -Werror)
-endif()
+target_link_libraries(bulk PRIVATE async)
 
 # Установка целей
-install(TARGETS helloworld_cli helloworld
+install(TARGETS bulk async
     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
+    LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
 )
