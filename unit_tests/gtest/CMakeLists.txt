@@ -12,7 +12,7 @@ add_executable(unit_google_tests
 
 # Добавляем директории с заголовочными файлами
 target_include_directories(unit_google_tests PRIVATE 
-    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_SOURCE_DIR}/src
     ${CMAKE_BINARY_DIR}/src
 )
 
@@ -20,21 +20,21 @@ target_include_directories(unit_google_tests PRIVATE
 target_link_libraries(unit_google_tests PRIVATE 
 	gtest 
 	gtest_main 
-	helloworld
+	bayan_logic
 )
 
 # Установка стандартов
-set_target_properties(unit_google_tests PROPERTIES
-	CXX_STANDARD 17
-	CXX_STANDARD_REQUIRED ON
-)
+# set_target_properties(unit_google_tests PROPERTIES
+# 	CXX_STANDARD 17
+# 	CXX_STANDARD_REQUIRED ON
+# )
 
 # Установка опций компилятора
-if (MSVC)
-	target_compile_options(unit_google_tests PRIVATE /W4)
-else()
-	target_compile_options(unit_google_tests PRIVATE -Wall -Wextra -pedantic -Werror)
-endif()
+# if (MSVC)
+# 	target_compile_options(unit_google_tests PRIVATE /W4)
+# else()
+# 	target_compile_options(unit_google_tests PRIVATE -Wall -Wextra -pedantic -Werror)
+# endif()
 
 # install(TARGETS unit_google_tests
 #     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
