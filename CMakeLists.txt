@@ -6,11 +6,6 @@ project(bayan_cli VERSION ${PROJECT_VESRION})
 option(WITH_BOOST_TEST "Whether to build Boost test" ON)
 option(WITH_GOOGLE_TEST "Whether to build Google test" ON)
 
-# Установка выходных директорий
-# set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-# set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-# set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-
 # Отключаем установку в системные директории
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "Install path prefix" FORCE)
@@ -18,6 +13,14 @@ endif()
 
 # unit_tests/CMakeLists.txt
 enable_testing()
+
+set(PROJECT_INCLUDE_DIRS
+    ${CMAKE_SOURCE_DIR}/src  # Для lib_version.h
+    ${CMAKE_BINARY_DIR}/src  # Для сгенерированного version.h
+)
+# Делаем переменную доступной для всех поддиректорий (CACHE INTERNAL)
+set(PROJECT_INCLUDE_DIRS ${PROJECT_INCLUDE_DIRS} 
+    CACHE INTERNAL "Global include directories for all targets")
 
 # Добавление поддиректорий
 add_subdirectory(src)
