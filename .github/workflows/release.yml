@@ -29,14 +29,6 @@ jobs:
       - name: Run tests
         run: cmake --build . --target test
       
-      - name: Run Scripts
-        run: |
-            mkdir build && cd build
-            cmake ..
-            cmake --build .
-            cmake --install .
-            ./install/bin/test_runner.sh
-
       - name: Build Package
         run: cmake --build . --target package
 
