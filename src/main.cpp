@@ -17,10 +17,10 @@ int main(int argc, char* argv[])
     std::cout << "Starting file scan..." << std::endl;
     FileScanner scanner(config);
     FileGroupsBySize candidates = scanner.scan();
-    std::cout << "Found " << candidates.size() 
+    std::cout << "Found " << candidates.size()
               << " groups of files with matching sizes (total potential duplicates: "
               << std::accumulate(
-                    candidates.begin(), candidates.end(), 0, 
+                    candidates.begin(), candidates.end(), 0,
                     [](int sum, const auto& pair){ return sum + static_cast<int>(pair.second.size()); })
               << " files)." << std::endl;
 

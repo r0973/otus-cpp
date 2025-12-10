@@ -1,13 +1,6 @@
 # Настройка версии
 configure_file(version.h.in version.h @ONLY)
 
-# Настройка скриптов
-# configure_file(
-#     "${CMAKE_SOURCE_DIR}/src/run_test.sh.in" # Путь к шаблону
-#     "${CMAKE_BINARY_DIR}/bin/run_test.sh"    # Путь, куда сгенерировать скрипт в каталоге сборки
-#     @ONLY
-# )
-
 # Находим Boost
 find_package(Boost 1.83 REQUIRED COMPONENTS
     filesystem program_options system regex)
@@ -49,7 +42,12 @@ install(TARGETS bayan bayan_logic
 )
 
 # Установка скриптов
-# install(FILES "${CMAKE_BINARY_DIR}/bin/run_test.sh"
-#     DESTINATION ${CMAKE_INSTALL_PREFIX}/bin  # Целевой каталог установки (например, /usr/local/bin)
-#     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
-# )
+install(FILES 
+    ${CMAKE_SOURCE_DIR}/scripts/test_crc32.sh
+    ${CMAKE_SOURCE_DIR}/scripts/test_funcs.sh
+    ${CMAKE_SOURCE_DIR}/scripts/test_md5.sh
+    ${CMAKE_SOURCE_DIR}/scripts/test_nested.sh
+    ${CMAKE_SOURCE_DIR}/scripts/test_runner.sh
+    DESTINATION ${CMAKE_INSTALL_PREFIX}/bin 
+    PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
+)
