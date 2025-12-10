@@ -18,7 +18,7 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y cmake
 
       - name: Install Boost
-        run: sudo apt-get update && sudo apt-get install libboost-test-dev -y
+        run: sudo apt-get update && sudo apt-get install libboost-all-dev -y
 
       - name: Configure CMake
         run: cmake . -DPATCH_VERSION=${{ github.run_number }} -DWITH_BOOST_TEST=ON -DWITH_GOOGLE_TEST=ON
@@ -28,6 +28,14 @@ jobs:
 
       - name: Run tests
         run: cmake --build . --target test
+      
+      - name: Run Scripts
+        run: |
+            mkdir build && cd build
+            cmake ..
+            cmake --build .
+            cmake --install .
+            ./install/bin/test_runner.sh
 
       - name: Build Package
         run: cmake --build . --target package
