@@ -1,4 +1,5 @@
 #pragma once
+
 #include "Observer.h"
 #include "Dispatcher.h"
 #include <memory>

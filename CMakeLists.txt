@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 set(PATCH_VERSION "1" CACHE INTERNAL "Patch version")
 set(PROJECT_VESRION 0.0.${PATCH_VERSION})
-project(async_tool VERSION ${PROJECT_VESRION})
+project(async VERSION ${PROJECT_VESRION})
 
 # Установка C++ стандарта для всего проекта
 set(CMAKE_CXX_STANDARD 17)
@@ -32,6 +32,7 @@ set(PROJECT_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/src  # Для lib_version.h
     ${CMAKE_BINARY_DIR}/src  # Для сгенерированного version.h
 )
+
 # Делаем переменную доступной для всех поддиректорий (CACHE INTERNAL)
 set(PROJECT_INCLUDE_DIRS ${PROJECT_INCLUDE_DIRS} 
     CACHE INTERNAL "Global include directories for all targets")

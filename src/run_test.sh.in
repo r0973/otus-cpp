@@ -1,5 +1,8 @@
 #!/bin/bash
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$SCRIPT_DIR"
+
 # --- Настройка путей ---
 BULK_EXECUTABLE="@CMAKE_INSTALL_PREFIX@/bin/bulk"
 
@@ -32,6 +35,7 @@ echo "Оба клиента завершили работу."
 
 # --- Анализ результатов ---
 echo "--- Анализ консольного вывода ---"
+echo "Консоль Клиента 1:"
 cat console_client1.log
 echo "-------------------"
 echo "Консоль Клиента 2:"
