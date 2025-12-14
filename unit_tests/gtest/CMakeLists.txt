@@ -5,40 +5,26 @@ add_subdirectory(${CMAKE_SOURCE_DIR}/googletest
 )
 
 # Создание тестового исполняемого файла
-add_executable(unit_google_tests 
-	test_main_gtest.cpp
+add_executable(unit_google_tests
 	test_version.cpp
+	test_AnyData.cpp
+	test_Concurrent.cpp
+	test_LRUCache.cpp
+	test_Logger.cpp
+	test_main_gtest.cpp
 )
 
 # Добавляем директории с заголовочными файлами
 target_include_directories(unit_google_tests PRIVATE 
-    ${CMAKE_SOURCE_DIR}/include
-    ${CMAKE_BINARY_DIR}/src
+    ${PROJECT_INCLUDE_DIRS}
 )
 
 # Линковка
 target_link_libraries(unit_google_tests PRIVATE 
 	gtest 
 	gtest_main 
-	helloworld
+	nosqldbtool
 )
-
-# Установка стандартов
-set_target_properties(unit_google_tests PROPERTIES
-	CXX_STANDARD 17
-	CXX_STANDARD_REQUIRED ON
-)
-
-# Установка опций компилятора
-if (MSVC)
-	target_compile_options(unit_google_tests PRIVATE /W4)
-else()
-	target_compile_options(unit_google_tests PRIVATE -Wall -Wextra -pedantic -Werror)
-endif()
-
-# install(TARGETS unit_google_tests
-#     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-# )
 
 # Настройка тестов
 enable_testing()
