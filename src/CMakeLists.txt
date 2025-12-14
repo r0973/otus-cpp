@@ -16,9 +16,10 @@ target_include_directories(nosqldbtool
 
 # Добавляем файлы для сборки
 target_sources(nosqldbtool PRIVATE
-    ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/core/
+    ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/core/AnyData.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/storage/
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/utils/Logger.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/serialization/TypeRegistry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib_version.cpp
 )
 

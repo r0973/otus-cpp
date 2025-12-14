@@ -4,3 +4,6 @@ out/
 *.txt ! CMakeLists.txt
 *.tsv
 *.code*
+*.csv
+*.log
+*.clang*

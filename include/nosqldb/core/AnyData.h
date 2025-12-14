@@ -7,6 +7,8 @@
 #include <string>
 #include <vector>
 #include <cstring>
+#include <cstdint>
+#include "TypeMetaData.h"
 
 namespace nosqldb
 {
@@ -93,7 +95,7 @@ public:
         }
     }
     
-    // Сериализация (для этапа 2, но декларируем тут)
+    // Сериализация
     std::vector<char> Serialize() const;
     static AnyData Deserialize(const std::vector<char>& data);
     
