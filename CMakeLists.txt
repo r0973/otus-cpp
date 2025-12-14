@@ -47,6 +47,16 @@ set(PROJECT_INCLUDE_DIRS ${PROJECT_INCLUDE_DIRS}
 # Добавление поддиректорий
 add_subdirectory(src)
 
+# Добавляем примеры, если опция BUILD_EXAMPLES включена
+if(BUILD_EXAMPLES)
+    # Убеждаемся, что директория examples существует
+    if(EXISTS "${CMAKE_SOURCE_DIR}/examples")
+        add_subdirectory(examples)
+    else()
+        message(WARNING "Examples directory not found at ${CMAKE_SOURCE_DIR}/examples")
+    endif()
+endif()
+
 # Создаем общую тестовую цель заранее
 if(WITH_GOOGLE_TEST OR WITH_BOOST_TEST)
     add_custom_target(all_tests COMMENT "Test executables will be added as dependencies")

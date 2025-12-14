@@ -204,11 +204,11 @@ public:
         std::unique_lock lock(extractorMutex_);
         
         // Сохраняем extractor
-        extractors_[indexName] = {
+        extractors_.emplace(indexName, ExtractorInfo{
             typeid(DataType),
             typeid(FieldType),
             std::make_shared<std::function<FieldType(const DataType&)>>(extractor)
-        };
+        });
         
         // Создаем индекс
         indexManager_.CreateIndex<FieldType>(indexName);
