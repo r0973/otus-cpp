@@ -11,6 +11,8 @@
 #include <optional>
 #include <shared_mutex>
 #include "TypeMetaData.h"
+#include "protos/user.pb.h"
+#include "protos/product.pb.h"
 
 namespace nosqldb
 {

@@ -12,3 +12,8 @@ target_include_directories(user_storage_example PRIVATE ${PROJECT_INCLUDE_DIRS})
 add_executable(benchmark_comparison benchmark_comparison.cpp)
 target_link_libraries(benchmark_comparison PRIVATE nosqldbtool)
 target_include_directories(benchmark_comparison PRIVATE ${PROJECT_INCLUDE_DIRS})
+
+# Определяем исполняемый файл для user_proto_example.cpp
+add_executable(user_proto_example user_proto_example.cpp)
+target_link_libraries(user_proto_example PRIVATE nosqldbtool protos_tool ${Protobuf_LIBRARIES})
+target_include_directories(user_proto_example PRIVATE ${PROJECT_INCLUDE_DIRS})

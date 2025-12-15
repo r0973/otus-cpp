@@ -113,6 +113,9 @@ void TypeRegistry::RegisterStandardTypes() {
     RegisterType<double>(AnyDataTypeId::Double, "double");
     RegisterType<std::string>(AnyDataTypeId::String, "string");
     // TODO: добавить другие типы здесь:
+    // Регистрация Protobuf типов
+    RegisterType<data::User>(AnyDataTypeId::ProtoUser, "nosqldb.data.User");
+    RegisterType<data::Product>(AnyDataTypeId::ProtoProduct, "nosqldb.data.Product");
      
 }
 
@@ -120,6 +123,8 @@ void TypeRegistry::RegisterStandardTypes() {
 template void TypeRegistry::RegisterType<int>(AnyDataTypeId, const std::string&);
 template void TypeRegistry::RegisterType<double>(AnyDataTypeId, const std::string&);
 template void TypeRegistry::RegisterType<std::string>(AnyDataTypeId, const std::string&);
-
+// Явная инстанциация шаблонов для Protobuf структур
+template void TypeRegistry::RegisterType<nosqldb::data::User>(AnyDataTypeId, const std::string&);
+template void TypeRegistry::RegisterType<nosqldb::data::Product>(AnyDataTypeId, const std::string&);
 
 } // namespace nosqldb

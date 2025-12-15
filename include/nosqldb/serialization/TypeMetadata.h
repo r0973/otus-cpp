@@ -13,7 +13,10 @@ enum class AnyDataTypeId : uint32_t {
     Int = 1,
     Double = 2,
     String = 3,
-    Custom = 4 // Идентификатор для всех зарегистрированных POD-типов
+    Custom = 4, // Идентификатор для всех зарегистрированных POD-типов
+    // Новые ID для Protobuf структур
+    ProtoUser = 101,
+    ProtoProduct = 102
 };
 
 } // namespace nosqldb

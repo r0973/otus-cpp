@@ -4,6 +4,8 @@
 #include <cstring>
 #include <string>
 #include <stdexcept>
+#include "protos/user.pb.h" 
+#include "protos/product.pb.h"
 
 namespace nosqldb
 {
@@ -52,6 +54,43 @@ struct BinarySerializer<std::string> {
     // Десериализация строки
     static std::string Deserialize(const std::vector<char>& data) {
         return std::string(data.begin(), data.end());
+    }
+};
+
+// Специализация для Protobuf структуры User
+template<>
+struct BinarySerializer<data::User> {
+    static std::vector<char> Serialize(const data::User& value) {
+        std::string bytes;
+        value.SerializeToString(&bytes); // Используем метод Protobuf
+        return std::vector<char>(bytes.begin(), bytes.end());
+    }
+
+    static data::User Deserialize(const std::vector<char>& data) {
+        data::User value;
+        // Используем метод Protobuf для парсинга из бинарного буфера
+        if (!value.ParseFromArray(data.data(), static_cast<int>(data.size()))) {
+            throw std::runtime_error("Failed to deserialize User struct from protobuf.");
+        }
+        return value;
+    }
+};
+
+// Специализация для Protobuf структуры Product
+template<>
+struct BinarySerializer<data::Product> {
+    static std::vector<char> Serialize(const data::Product& value) {
+        std::string bytes;
+        value.SerializeToString(&bytes);
+        return std::vector<char>(bytes.begin(), bytes.end());
+    }
+
+    static data::Product Deserialize(const std::vector<char>& data) {
+        data::Product value;
+        if (!value.ParseFromArray(data.data(), static_cast<int>(data.size()))) {
+            throw std::runtime_error("Failed to deserialize Product struct from protobuf.");
+        }
+        return value;
     }
 };
 
