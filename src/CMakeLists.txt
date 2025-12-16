@@ -6,33 +6,7 @@ configure_file(
     @ONLY
 )
 
-# set(NOSQLDB_CORE_SRCS
-#     nosqldb/core/AnyData.cpp # все .cpp файлы из nosqldb/core
-# )
-
-# set(NOSQLDB_STORAGE_SRCS
-#     # все .cpp файлы из nosqldb/storage
-# )
-
-# set(NOSQLDB_UTILS_SRCS
-#     nosqldb/utils/Logger.cpp # все .cpp файлы из nosqldb/utils
-# )
-
-# set(NOSQLDB_SERIALIZATION_SRCS
-#     nosqldb/serialization/TypeRegistry.cpp # все .cpp файлы из nosqldb/serialization
-# )
-
-# # Собираем все исходники для основной библиотеки
-# set(NOSQLDB_ALL_SRCS
-#     lib_version.cpp
-#     ${NOSQLDB_CORE_SRCS}
-#     ${NOSQLDB_STORAGE_SRCS}
-#     ${NOSQLDB_UTILS_SRCS}
-#     ${NOSQLDB_SERIALIZATION_SRCS}
-# )
-
 # # Основная библиотека
-# add_library(nosqldbtool SHARED ${NOSQLDB_ALL_SRCS})
 add_library(nosqldbtool SHARED)
 
 # Подключение путей к заголовочным файлам
@@ -40,7 +14,6 @@ target_include_directories(nosqldbtool
     PUBLIC ${PROJECT_INCLUDE_DIRS}
     PUBLIC ${CMAKE_BINARY_DIR}/include
     PUBLIC ${CMAKE_BINARY_DIR}/src
-    # PUBLIC ${Protobuf_INCLUDE_DIRS}
     PUBLIC ${CMAKE_BINARY_DIR}  # Для protobuf
 )
 
@@ -48,7 +21,6 @@ target_include_directories(nosqldbtool
 target_sources(nosqldbtool PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/core/AnyData.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/utils/Logger.cpp
-    ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/serialization/TypeRegistry.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib_version.cpp
 )
 

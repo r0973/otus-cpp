@@ -11,7 +11,6 @@ add_executable(unit_google_tests
 	test_Concurrent.cpp
 	test_LRUCache.cpp
 	test_Logger.cpp
-	test_Serialization.cpp
 	test_Protobuf.cpp
 	test_main_gtest.cpp
 )

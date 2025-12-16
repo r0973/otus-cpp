@@ -5,6 +5,7 @@ find_package(Protobuf REQUIRED)
 set(PROTO_FILES
     user.proto
     product.proto
+    anydata.proto
 )
 
 # Генерируем файлы .pb.cc и .pb.h 
