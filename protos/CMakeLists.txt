@@ -6,6 +6,7 @@ set(PROTO_FILES
     user.proto
     product.proto
     anydata.proto
+    storage.proto
 )
 
 # Генерируем файлы .pb.cc и .pb.h 

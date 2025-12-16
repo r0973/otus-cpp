@@ -1,4 +1,3 @@
-// protos/anydata.proto
 syntax = "proto3";
 
 package nosqldb.protos;
