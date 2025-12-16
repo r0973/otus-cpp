@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package nosqldb.protos;
+package nosqldb.proto;
 
 // Импортируем существующие типы
 import "user.proto";

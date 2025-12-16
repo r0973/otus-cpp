@@ -1,4 +1,7 @@
 
+find_package(gRPC REQUIRED)
+find_package(Protobuf REQUIRED)
+
 # Настройка версии
 configure_file(
     "${CMAKE_SOURCE_DIR}/src/version.h.in"
@@ -23,10 +26,11 @@ target_sources(nosqldbtool PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/storage/FileSegmentManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/core/StorageManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/utils/Logger.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/network/NoSQLServiceImpl.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib_version.cpp
 )
 
-target_link_libraries(nosqldbtool PRIVATE protos_tool ${Protobuf_LIBRARIES})
+target_link_libraries(nosqldbtool PUBLIC protos_tool ${Protobuf_LIBRARIES})
 
 # Исполняемый файл
 add_executable(nosqldb main.cpp)
@@ -38,7 +42,22 @@ set_target_properties(nosqldb nosqldbtool PROPERTIES
 )
 
 # Линковка
-target_link_libraries(nosqldb PRIVATE nosqldbtool)
+target_link_libraries(nosqldb PRIVATE 
+    nosqldbtool
+    protos_tool
+    # gRPC::grpc++
+    # gRPC::grpc
+)
+
+# Создаем исполняемый файл сервера
+add_executable(nosqlserver ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/server/main.cpp)
+
+# Линкуем с основной библиотекой и gRPC
+target_link_libraries(nosqlserver PRIVATE 
+    nosqldbtool 
+    gRPC::grpc++ 
+    protobuf::libprotobuf
+)
 
 # Установка опций компилятора
 if (MSVC)
@@ -50,7 +69,7 @@ else()
 endif()
 
 # Установка целей
-install(TARGETS nosqldb nosqldbtool
+install(TARGETS nosqldb nosqldbtool nosqlserver
     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
     ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib

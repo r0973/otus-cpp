@@ -39,6 +39,7 @@ set(PROJECT_INCLUDE_DIRS
     ${CMAKE_SOURCE_DIR}/include/nosqldb/storage
     ${CMAKE_SOURCE_DIR}/include/nosqldb/utils
     ${CMAKE_SOURCE_DIR}/include/nosqldb/serialization
+    ${CMAKE_SOURCE_DIR}/include/nosqldb/network
 )
 
 # Делаем переменную доступной для всех поддиректорий (CACHE INTERNAL)

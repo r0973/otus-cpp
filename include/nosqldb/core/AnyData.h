@@ -14,7 +14,7 @@ namespace nosqldb
 {
 
 namespace data = nosqldb::data;
-namespace protos = nosqldb::protos;
+namespace proto = nosqldb::proto;
 
 class AnyData {
 private:
@@ -135,8 +135,8 @@ private:
     }
 public:
     // Конвертация в protobuf
-    nosqldb::protos::AnyDataProto ToProto() const {
-        nosqldb::protos::AnyDataProto proto;
+    nosqldb::proto::AnyDataProto ToProto() const {
+        nosqldb::proto::AnyDataProto proto;
 
         if (Is<int>()) {
             proto.set_int_value(Get<int>());
@@ -172,7 +172,7 @@ public:
     }
 public:
 // Создание из protobuf
-    static AnyData FromProto(const nosqldb::protos::AnyDataProto& proto) {
+    static AnyData FromProto(const nosqldb::proto::AnyDataProto& proto) {
         const std::string& type_name = proto.type_name();
 
         if (type_name == "int") {
@@ -209,7 +209,7 @@ public:
 public:
     // Десериализация через protobuf
     static AnyData DeserializeFromProto(const std::vector<char>& data) {
-        nosqldb::protos::AnyDataProto proto;
+        nosqldb::proto::AnyDataProto proto;
         proto.ParseFromArray(data.data(), data.size());
         return FromProto(proto);
     }

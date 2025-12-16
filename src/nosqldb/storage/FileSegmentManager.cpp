@@ -7,7 +7,7 @@ namespace fs = std::filesystem;
 
 namespace nosqldb {
 
-namespace protos = nosqldb::protos;
+namespace proto = nosqldb::proto;
 
 FileSegmentManager::FileSegmentManager(const std::string& base_path, size_t max_entries)
     : base_path_(base_path), max_entries_(max_entries) {
@@ -21,7 +21,7 @@ std::string FileSegmentManager::get_segment_path(size_t index) const {
 }
 
 void FileSegmentManager::Save(const std::unordered_map<std::string, AnyData>& data) {
-    protos::StorageSegment current_segment;
+    proto::StorageSegment current_segment;
     size_t segment_index = 0;
     size_t entry_count = 0;
 
@@ -61,7 +61,7 @@ void FileSegmentManager::Load(std::unordered_map<std::string, AnyData>& out_data
     for (const auto& entry : fs::directory_iterator(base_path_)) {
         if (entry.path().extension() == ".db") {
             std::ifstream in(entry.path().string(), std::ios::binary);
-            protos::StorageSegment segment;
+            proto::StorageSegment segment;
             if (segment.ParseFromIstream(&in)) {
                 for (const auto& proto_entry : segment.entries()) {
                     out_data[proto_entry.key()] = AnyData::FromProto(proto_entry.value());
