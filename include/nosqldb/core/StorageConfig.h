@@ -30,6 +30,15 @@ struct StorageConfig {
     // Метрики
     bool collectMetrics = true;
     
+    // Персистентность данных
+    bool enablePersistence = false;
+
+    // Путь
+    std::string dataDirectory = "./db_data"; 
+    
+    // Размер сегмента
+    size_t maxSegmentSize = 5000; // Количество записей в одном файле
+
     StorageConfig() = default;
 };
 

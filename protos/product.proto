@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package nosqldb.data;
+
+message Product {
+  int32 product_id = 1;
+  string name = 2;
+  string category = 3;
+  double price = 4;
+  int32 stock = 5;
+}

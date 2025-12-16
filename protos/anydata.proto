@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+package nosqldb.protos;
+
+// Импортируем существующие типы
+import "user.proto";
+import "product.proto";
+
+message AnyDataProto {
+  oneof value {
+    // Базовые типы
+    int32 int_value = 1;
+    double double_value = 2;
+    string string_value = 3;
+    bool bool_value = 4;
+    bytes binary_data = 5;
+    int64 int64_value = 6;
+    float float_value = 7;
+    
+    // Контейнеры ( пока опционально)
+    IntList int_list = 10;
+    StringList string_list = 11;
+    DoubleList double_list = 12;
+    
+    // Составные типы
+    nosqldb.data.User user = 100;
+    nosqldb.data.Product product = 101;
+  }
+  
+  // Метаданные для десериализации
+  string type_name = 1000;
+  uint32 version = 1001;
+}
+
+// Вспомогательные сообщения для контейнеров
+message IntList {
+  repeated int32 values = 1;
+}
+
+message StringList {
+  repeated string values = 1;
+}
+
+message DoubleList {
+  repeated double values = 1;
+}

@@ -11,6 +11,7 @@
 #include "AnyData.h"
 #include "LRUCache.h"
 #include "SecondaryIndex.h"
+#include "StorageConfig.h"
 
 namespace nosqldb
 {
@@ -373,6 +374,26 @@ private:
                 index->Add(fieldValue, key);
             }
         }
+    }
+protected:
+    void RebuildIndices() { 
+        // пока заглушка
+    };
+
+protected:
+    // Возвращает копию всех данных для сохранения. 
+    std::unordered_map<std::string, AnyData> GetAllDataSnapshot() const {
+        std::shared_lock<std::shared_mutex> lock(storeMutex_);
+        return mainStore_; // Возвращаем копию
+    }
+
+    // Метод для массовой загрузки (используется при старте DiskStorage)
+    void LoadDataSnapshot(const std::unordered_map<std::string, AnyData>& loaded_data) {
+        std::unique_lock<std::shared_mutex> lock(storeMutex_);
+        mainStore_ = loaded_data;
+        // Вызвать очистку кэша, так как данные изменились
+        lruCache_.Clear();
+        // Индексы перестроить позже в DiskStorage
     }
 };
 

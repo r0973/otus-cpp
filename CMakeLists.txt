@@ -45,6 +45,9 @@ set(PROJECT_INCLUDE_DIRS
 set(PROJECT_INCLUDE_DIRS ${PROJECT_INCLUDE_DIRS} 
     CACHE INTERNAL "Global include directories for all targets")
 
+# Добавляем поддиректорию с protobuf
+add_subdirectory(protos)
+
 # Добавление поддиректорий
 add_subdirectory(src)
 
