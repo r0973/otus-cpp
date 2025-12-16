@@ -1,5 +1,8 @@
-# Найти пакет Protobuf (можно вынести в корень, но пусть будет тут для самодостаточности)
+# Найти пакет Protobuf
 find_package(Protobuf REQUIRED)
+
+#Поиск gRPC
+find_package(gRPC REQUIRED)
 
 # перечисление proto файлов
 set(PROTO_FILES
@@ -7,10 +10,12 @@ set(PROTO_FILES
     product.proto
     anydata.proto
     storage.proto
+    nosql_service.proto
 )
 
 # Генерируем файлы .pb.cc и .pb.h 
 protobuf_generate_cpp(PROTO_SRCS PROTO_HEADERS ${PROTO_FILES}
+    PLUGIN "protoc-gen-grpc=$<TARGET_FILE:gRPC::grpc_cpp_plugin>"
     PROTOC_OUT_DIR ${CMAKE_BINARY_DIR}/protos 
 )
 
@@ -25,4 +30,8 @@ target_include_directories(protos_tool PRIVATE
     # ${PROTOBUF_INCLUDE_DIRS}
 )
 
-target_link_libraries(protos_tool PRIVATE ${Protobuf_LIBRARIES})
+target_link_libraries(protos_tool PRIVATE 
+    ${Protobuf_LIBRARIES}
+    gRPC::grpc++
+    gRPC::grpc
+)
