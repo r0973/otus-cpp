@@ -6,12 +6,14 @@
 #include "nosql_service.grpc.pb.h"  // потом сервис
 
 #include "StorageManager.h"
+#include "StorageConfig.h"
 
 namespace nosqldb {
 
 class NoSQLServiceImpl final : public nosqldb::proto::NoSQLService::Service {
 public:
-    explicit NoSQLServiceImpl(const std::string& root_path);
+    explicit NoSQLServiceImpl(const std::string& root_path
+                             , const StorageConfig& consfig = StorageConfig{});
     ~NoSQLServiceImpl() override = default; 
     grpc::Status Put([[maybe_unused]] grpc::ServerContext* context, 
                      const nosqldb::proto::PutRequest* request,
@@ -34,6 +36,7 @@ public:
                          [[maybe_unused]] ::google::protobuf::Empty* response) override;
 private:
     StorageManager manager_;
+    StorageConfig config_;
 };
 
 } // namespace nosqldb

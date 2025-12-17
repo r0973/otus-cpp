@@ -5,16 +5,17 @@
 
 namespace nosqldb {
 
-NoSQLServiceImpl::NoSQLServiceImpl(const std::string& root_path) 
-    : manager_(root_path) {}
-
+NoSQLServiceImpl::NoSQLServiceImpl(const std::string& root_path, const StorageConfig& config) 
+    : manager_(root_path)
+	, config_ (config)
+{}
     // Реализация RPC Put
 grpc::Status NoSQLServiceImpl::Put([[maybe_unused]] grpc::ServerContext* context, 
                                     const nosqldb::proto::PutRequest* request,
                                    [[maybe_unused]] google::protobuf::Empty* response) {
 	try {
 		// Открываем базу данных по имени из запроса
-		auto* db = manager_.OpenStorage(request->db_name(), StorageConfig{});
+		auto* db = manager_.OpenStorage(request->db_name(), config_);
 		
 		// Восстанавливаем AnyData из proto и сохраняем
 		db->Put(request->key(), AnyData::FromProto(request->value()));
@@ -33,9 +34,9 @@ grpc::Status NoSQLServiceImpl::Get([[maybe_unused]] grpc::ServerContext* context
 		std::cout << "[SERVER] Get request: db=" << request->db_name() 
               << ", key=" << request->key() << std::endl;
 		auto* db = manager_.OpenStorage(request->db_name(), StorageConfig{});
-		// auto result = db->Get<AnyData>(request->key()); // Предполагаем наличие Get<AnyData> или аналогичного метода
+		// auto result = db->Get<AnyData>(request->key());
 		auto result = db->GetAnyData(request->key()); 
-		
+
 		if (result.has_value()) {
 			std::cout << "[SERVER] Key found, converting to proto..." << std::endl;
 			response->set_found(true);
