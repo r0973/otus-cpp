@@ -54,7 +54,14 @@ public:
           versionStore_{},
           enableVersioning_{config.enableVersioning},
           maxVersions_(config.maxVersionsPerKey){}
-    
+public:
+    virtual ~MemoryStorage() = default; 
+
+    // 2. Виртуальный метод для сохранения
+    virtual void Save() {
+        // Базовый класс ничего не делает
+    }
+
     // Основные операции
     template<typename T>
     bool Put(const std::string& key, const T& value) {
@@ -93,33 +100,42 @@ public:
         return true;
     }
     
-    template<typename T>
-    std::optional<T> Get(const std::string& key) {
-        // Сначала пробуем получить из кэша
+    std::optional<AnyData> GetAnyData(const std::string& key) {
+        // 1. Сначала пробуем получить из кэша
         auto cached = lruCache_.Get(key);
         if (cached.has_value()) {
+            std::cout << "[STORAGE] Found in cache (LRU)" << std::endl;
+            return cached; // Возвращаем AnyData из кэша
+        }
+
+        // 2. Если в кэше нет, ищем в основном хранилище
+        std::shared_lock lock(storeMutex_);
+        std::cout << "[STORAGE] Get key from main store: " << key << std::endl;
+        
+        auto it = mainStore_.find(key);
+        if (it != mainStore_.end()) {
+            // Ключ найден в памяти
+            AnyData value = it->second;
+            
+            // 3. Обновляем кэш, чтобы при следующем запросе взять оттуда
+            lruCache_.Put(key, value);
+            
+            return value;
+        }
+
+        return std::nullopt;
+    }
+
+    template<typename T>
+    std::optional<T> Get(const std::string& key) {
+        auto data = GetAnyData(key);
+        if (data.has_value()) {
             T value;
-            if (cached->TryGet(value)) {
+            if (data->TryGet(value)) {
                 return value;
             }
         }
-        
-        // Если нет в кэше, ищем в основном хранилище
-        std::shared_lock lock(storeMutex_);
-        auto it = mainStore_.find(key);
-        if (it == mainStore_.end()) {
-            return std::nullopt;
-        }
-        
-        T value;
-        if (!it->second.TryGet(value)) {
-            return std::nullopt;
-        }
-        
-        // Асинхронно обновляем кэш (не блокируя)
-        lruCache_.Put(key, AnyData(value));
-        
-        return value;
+        return std::nullopt;
     }
     
     bool Delete(const std::string& key) {

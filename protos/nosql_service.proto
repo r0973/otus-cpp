@@ -1,0 +1,48 @@
+syntax = "proto3";
+
+package nosqldb.proto;
+
+import "anydata.proto";
+import "google/protobuf/empty.proto";
+
+// Запрос на получение данных
+message GetRequest {
+    string db_name = 1; // Имя конкретной БД в StorageManager
+    string key = 2;
+}
+
+// Ответ на запрос данных
+message GetResponse {
+    bool found = 1;
+    AnyDataProto value = 2;
+}
+
+// Запрос на вставку/обновление
+message PutRequest {
+    string db_name = 1;
+    string key = 2;
+    AnyDataProto value = 3;
+}
+
+// Запрос на удаление
+message DeleteRequest {
+    string db_name = 1;
+    string key = 2;
+}
+
+// Запрос на получение списка всех баз данных
+message ListStoragesResponse {
+    repeated string names = 1;
+}
+
+// Сервис NoSQL
+service NoSQLService {
+    // CRUD операции
+    rpc Put(PutRequest) returns (google.protobuf.Empty);
+    rpc Get(GetRequest) returns (GetResponse);
+    rpc Delete(DeleteRequest) returns (google.protobuf.Empty);
+    
+    // Управление хранилищами
+    rpc ListStorages(google.protobuf.Empty) returns (ListStoragesResponse);
+    rpc SyncAll(google.protobuf.Empty) returns (google.protobuf.Empty);
+}
