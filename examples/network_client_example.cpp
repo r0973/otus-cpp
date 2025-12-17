@@ -1,4 +1,5 @@
 #include <iostream>
+#include <thread>
 #include "NoSQLClient.h"
 
 int main() {
@@ -13,9 +14,12 @@ int main() {
     client.Put(db, "msg", nosqldb::AnyData(std::string("Hello from Network Client!")));
     client.Put(db, "count", nosqldb::AnyData(100));
 
-    // 2.1.
+    // 2.1. Синхронизируем для сброса на диск
     std::cout << "Syncing all data to disk..." << std::endl;
     client.SyncAll();
+
+    // 3. пауза перед чтением
+    // std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // 3. Читаем данные
     auto res = client.Get(db, "msg");

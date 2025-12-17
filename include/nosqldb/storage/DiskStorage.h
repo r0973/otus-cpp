@@ -17,7 +17,7 @@ public:
     }
 
     // Сохранение текущего состояния на диск
-    void Save() {
+    void Save() override {
         auto snapshot = GetAllDataSnapshot();
         segment_manager_.Save(snapshot);
     }

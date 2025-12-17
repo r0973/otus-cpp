@@ -30,18 +30,24 @@ grpc::Status NoSQLServiceImpl::Get([[maybe_unused]] grpc::ServerContext* context
                                    const nosqldb::proto::GetRequest* request,
                                    nosqldb::proto::GetResponse* response) {
 	try {
+		std::cout << "[SERVER] Get request: db=" << request->db_name() 
+              << ", key=" << request->key() << std::endl;
 		auto* db = manager_.OpenStorage(request->db_name(), StorageConfig{});
-		auto result = db->Get<AnyData>(request->key()); // Предполагаем наличие Get<AnyData> или аналогичного метода
-
+		// auto result = db->Get<AnyData>(request->key()); // Предполагаем наличие Get<AnyData> или аналогичного метода
+		auto result = db->GetAnyData(request->key()); 
+		
 		if (result.has_value()) {
+			std::cout << "[SERVER] Key found, converting to proto..." << std::endl;
 			response->set_found(true);
 			*response->mutable_value() = result->ToProto();
 		} else {
+			std::cout << "[SERVER] Key NOT found in database" << std::endl;
 			response->set_found(false);
 		}
 		return grpc::Status::OK;
 	} catch (const std::exception& e) {
-		return grpc::Status(grpc::StatusCode::INTERNAL, e.what());
+		std::cerr << "[SERVER] Error in Get: " << e.what() << std::endl;
+        return grpc::Status(grpc::StatusCode::INTERNAL, e.what());
 	}
 }
 

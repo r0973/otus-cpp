@@ -18,12 +18,15 @@ std::string StorageManager::get_storage_path(const std::string& name) const {
 DiskStorage* StorageManager::OpenStorage(const std::string& name, const StorageConfig& config) {
     std::unique_lock lock(map_mutex_);
 
-    // Если база уже открыта — возвращаем её
+	std::cout << "[MANAGER] OpenStorage: " << name << std::endl;
+    
+	// Если база уже открыта — возвращаем её
     if (active_storages_.count(name)) {
-        return active_storages_[name].get();
+        std::cout << "[MANAGER] Returning existing storage" << std::endl;
+		return active_storages_[name].get();
     }
 
-    // Настраиваем конфиг для конкретной папки
+	// Настраиваем конфиг для конкретной папки
     StorageConfig specific_config = config;
     specific_config.dataDirectory = get_storage_path(name);
     specific_config.enablePersistence = true;
@@ -32,6 +35,7 @@ DiskStorage* StorageManager::OpenStorage(const std::string& name, const StorageC
     auto storage = std::make_unique<DiskStorage>(specific_config);
     DiskStorage* ptr = storage.get();
     active_storages_[name] = std::move(storage);
+	std::cout << "[MANAGER] Creating new storage" << std::endl;
 
     return ptr;
 }
