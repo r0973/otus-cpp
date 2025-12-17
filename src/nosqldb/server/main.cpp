@@ -4,9 +4,9 @@
 #include <grpcpp/grpcpp.h>
 #include "NoSQLServiceImpl.h"
 
-void RunServer(const std::string& db_path, const std::string& port) {
+void RunServer(const std::string& db_path, const std::string& port, const nosqldb::StorageConfig& config ) {
     std::string server_address("0.0.0.0:" + port);
-    nosqldb::NoSQLServiceImpl service(db_path);
+    nosqldb::NoSQLServiceImpl service(db_path, config);
 
     grpc::ServerBuilder builder;
     // Слушаем порт без шифрования (Insecure) для курсового проекта
@@ -23,10 +23,13 @@ void RunServer(const std::string& db_path, const std::string& port) {
 int main(int argc, char** argv) {
     std::string port = "50051";
     std::string db_path = "./server_data";
-
+    
     if (argc > 1) port = argv[1];
     if (argc > 2) db_path = argv[2];
 
-    RunServer(db_path, port);
+    nosqldb::StorageConfig config;
+    config.maxSegmentSize = 100; // для демо вручную
+    config.enablePersistence = true;
+    RunServer(db_path, port, config);
     return 0;
 }

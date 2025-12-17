@@ -21,3 +21,8 @@ target_include_directories(user_proto_example PRIVATE ${PROJECT_INCLUDE_DIRS})
 # Определяем исполняемый файл для network_client_example.cpp
 add_executable(network_client_example network_client_example.cpp)
 target_link_libraries(network_client_example PRIVATE nosqldbtool)
+
+
+# Определяем исполняемый файл для final_demo_segmentation.cpp
+add_executable(final_demo_segmentation_example final_demo_segmentation.cpp)
+target_link_libraries(final_demo_segmentation_example PRIVATE nosqldbtool)
