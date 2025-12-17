@@ -27,6 +27,7 @@ target_sources(nosqldbtool PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/core/StorageManager.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/utils/Logger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/network/NoSQLServiceImpl.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/nosqldb/network/NoSQLClient.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib_version.cpp
 )
 
