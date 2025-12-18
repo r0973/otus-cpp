@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - feature/nosql_storage
     tags:
       - 'v*'
 jobs:
@@ -13,20 +14,41 @@ jobs:
       - uses: actions/checkout@v2
         with:
           submodules: true
-      - name: Install CMake
-        run: sudo apt-get update && sudo apt-get install -y cmake
-
-      - name: Install Boost
-        run: sudo apt-get update && sudo apt-get install libboost-test-dev -y
-
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            cmake \
+            build-essential \
+            libboost-test-dev \
+            libgtest-dev \
+            protobuf-compiler \
+            libprotobuf-dev \
+            grpc-proto \
+            libgrpc++-dev \
+            protobuf-compiler-grpc
+      
       - name: Configure CMake
-        run: cmake . -DPATCH_VERSION=${{ github.run_number }} -DWITH_BOOST_TEST=ON -DWITH_GOOGLE_TEST=ON
+        # Создаем папку build и конфигурируем проект
+        run: cmake -B ${{github.workspace}}/build \
+                   -DPATCH_VERSION=${{ github.run_number }} \
+                   -DCMAKE_BUILD_TYPE=Release \
+                   -DWITH_BOOST_TEST=ON -DWITH_GOOGLE_TEST=ON \
+                   -DBUILD_EXAMPLES=ON
 
       - name: Build Project
         run: cmake --build .
 
-      - name: Run tests
-        run: cmake --build . --target test
+      - name: Run Unit Tests
+        # Запускаем Google Tests (включая интеграционные сетевые тесты)
+        working-directory: ${{github.workspace}}/build
+        run: ./bin/unit_google_tests
+
+      - name: Run Final Demo Script
+        # Запускаем ваш финальный демонстрационный сценарий
+        run: |
+          chmod +x scripts/run_final_demo.sh
+          ./scripts/run_final_demo.sh
 
       - name: Build Package
         run: cmake --build . --target package
@@ -51,6 +73,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./helloworld-0.0.${{ github.run_number }}-Linux.deb
-          asset_name: helloworld-0.0.${{ github.run_number }}-Linux.deb
+          asset_path: ./nosql_storage-0.0.${{ github.run_number }}-Linux.deb
+          asset_name: nosql_storage-0.0.${{ github.run_number }}-Linux.deb
           asset_content_type: application/vnd.debian.binary-package
