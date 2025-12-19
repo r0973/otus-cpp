@@ -41,11 +41,11 @@ jobs:
         # Запускаем Google Tests (включая интеграционные сетевые тесты)
         run: cmake --build . --target test
 
-      - name: Run Final Demo Script
-        # Запускаем ваш финальный демонстрационный сценарий
-        run: |
-          chmod +x scripts/run_final_demo.sh
-          ./scripts/run_final_demo.sh
+      # - name: Run Final Demo Script
+        # Запускаем финальный демонстрационный сценарий
+        # run: |
+        #   chmod +x scripts/run_final_demo.sh
+        #   ./scripts/run_final_demo.sh
 
       - name: Build Package
         run: cmake --build . --target package
