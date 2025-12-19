@@ -1,9 +1,13 @@
 .vscode/
 build/
 out/
+googletest/
 *.txt ! CMakeLists.txt
 *.tsv
 *.code*
 *.csv
 *.log
 *.clang*
+*.pdf
+*.err
+*.md ! README.md
