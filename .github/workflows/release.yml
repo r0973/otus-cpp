@@ -30,7 +30,6 @@ jobs:
       - name: Configure CMake
         # Создаем папку build и конфигурируем проект
         run: cmake -DPATCH_VERSION=${{ github.run_number }} \
-                   -DCMAKE_BUILD_TYPE=Release \
                    -DWITH_BOOST_TEST=ON -DWITH_GOOGLE_TEST=ON \
                    -DBUILD_EXAMPLES=ON
 
