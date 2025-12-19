@@ -24,7 +24,6 @@ jobs:
             libgtest-dev \
             protobuf-compiler \
             libprotobuf-dev \
-            grpc-proto \
             libgrpc++-dev \
             protobuf-compiler-grpc
       
