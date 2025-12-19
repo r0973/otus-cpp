@@ -29,8 +29,7 @@ jobs:
       
       - name: Configure CMake
         # Создаем папку build и конфигурируем проект
-        run: cmake -B ${{github.workspace}}/build \
-                   -DPATCH_VERSION=${{ github.run_number }} \
+        run: cmake -DPATCH_VERSION=${{ github.run_number }} \
                    -DCMAKE_BUILD_TYPE=Release \
                    -DWITH_BOOST_TEST=ON -DWITH_GOOGLE_TEST=ON \
                    -DBUILD_EXAMPLES=ON
@@ -40,8 +39,7 @@ jobs:
 
       - name: Run Unit Tests
         # Запускаем Google Tests (включая интеграционные сетевые тесты)
-        working-directory: ${{github.workspace}}/build
-        run: ./bin/unit_google_tests
+        run: cmake --build . --target test
 
       - name: Run Final Demo Script
         # Запускаем ваш финальный демонстрационный сценарий
