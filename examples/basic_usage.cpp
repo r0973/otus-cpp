@@ -53,24 +53,21 @@ int main() {
     // 3. Работа с пользовательскими типами
     std::cout << "\n2. Custom types:" << std::endl;
     
-    struct Person {
-        std::string name;
-        int age;
-        std::string city;
-        
-        bool operator==(const Person& other) const {
-            return name == other.name && age == other.age && city == other.city;
-        }
-    };
+    nosqldb::data::User alice;
+    alice.set_name("Alice");
+    alice.set_age(25);
+    alice.set_city("New York");
     
-    Person alice{"Alice", 25, "New York"};
-    Person bob{"Bob", 30, "London"};
+    nosqldb::data::User bob;
+    bob.set_name("Bob");
+    bob.set_age(30);
+    bob.set_city("London");
     
     db.Put("person:1", alice);
     db.Put("person:2", bob);
     
-    auto retrievedAlice = db.Get<Person>("person:1");
-    if (retrievedAlice && *retrievedAlice == alice) {
+    auto retrievedAlice = db.Get<nosqldb::data::User>("person:1");
+    if (retrievedAlice && retrievedAlice->name() == "Alice") {
         std::cout << "   Person 1 retrieved correctly" << std::endl;
     }
     

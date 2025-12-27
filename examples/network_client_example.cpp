@@ -2,6 +2,9 @@
 #include <thread>
 #include "NoSQLClient.h"
 
+// Для правильной работы данного примера необходимо сначала в отдельном терминале запустить
+// запустить сервер ./bin/nosqlserver
+
 int main() {
     // 1. Создаем канал связи
     auto channel = grpc::CreateChannel("localhost:50051", grpc::InsecureChannelCredentials());
@@ -19,7 +22,7 @@ int main() {
     client.SyncAll();
 
     // 3. пауза перед чтением
-    // std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
     // 3. Читаем данные
     auto res = client.Get(db, "msg");
