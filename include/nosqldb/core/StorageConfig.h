@@ -39,6 +39,13 @@ struct StorageConfig {
     // Размер сегмента
     size_t maxSegmentSize = 5000; // Количество записей в одном файле
 
+    // WAL для отказоустойчивости
+    bool enableWAL = true;  // По умолчанию включено
+
+    // WAL настройки
+    size_t walFlushInterval = 1000; // ms
+    size_t maxWALSize = 100 * 1024 * 1024; // 100MB
+
     StorageConfig() = default;
 };
 

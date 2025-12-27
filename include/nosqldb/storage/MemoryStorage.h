@@ -12,6 +12,8 @@
 #include "LRUCache.h"
 #include "SecondaryIndex.h"
 #include "StorageConfig.h"
+#include "WalManager.h"
+#include "Logger.h"
 
 namespace nosqldb
 {
@@ -44,6 +46,17 @@ private:
     mutable std::shared_mutex versionMutex_;
     bool enableVersioning_;
     size_t maxVersions_;
+
+protected:
+    // WAL
+    std::unique_ptr<WalManager> wal_manager_;
+    bool enable_wal_ = false;
+
+protected:
+    void EnableWal(const std::string& path) {
+        wal_manager_ = std::make_unique<WalManager>(path);
+    }
+
 public:
     explicit MemoryStorage(const StorageConfig& config = StorageConfig())
         : mainStore_{},
@@ -53,7 +66,15 @@ public:
           extractors_{},
           versionStore_{},
           enableVersioning_{config.enableVersioning},
-          maxVersions_(config.maxVersionsPerKey){}
+          maxVersions_(config.maxVersionsPerKey),
+          wal_manager_{nullptr},
+          enable_wal_{config.enableWAL}
+    {
+        if (enable_wal_) {
+            wal_manager_ = std::make_unique<WalManager>(config.dataDirectory);
+        }
+    }
+
 public:
     virtual ~MemoryStorage() = default; 
 
@@ -62,11 +83,42 @@ public:
         // Базовый класс ничего не делает
     }
 
+    // Восстановление из WAL
+    void RecoverFromWAL(const std::string& dataDirectory) {
+        if (!enable_wal_)
+            return;
+        
+        if (!wal_manager_) {
+            wal_manager_ = std::make_unique<WalManager>(dataDirectory);
+        }
+
+        wal_manager_->Recover(
+            // Обработчик для Put (type 1)
+            [this](const std::string& key, const AnyData& value) {
+                std::unique_lock lock(this->storeMutex_);
+                this->mainStore_[key] = value;
+            },
+            // Обработчик для Delete (type 2)
+            [this](const std::string& key) {
+                std::unique_lock lock(this->storeMutex_);
+                this->mainStore_.erase(key);
+            }
+        );
+        
+        RebuildIndices();
+    }
+
     // Основные операции
     template<typename T>
     bool Put(const std::string& key, const T& value) {
         std::unique_lock lock(storeMutex_);
         
+        // Сначала записываем в WAL (если включен)
+        if (enable_wal_ && wal_manager_) {
+            auto proto = AnyData(value).ToProto();
+            wal_manager_->LogPut(key, proto);
+        }
+
         // Получаем старое значение для обновления индексов
         std::optional<T> oldValue;
         auto it = mainStore_.find(key);
@@ -104,13 +156,11 @@ public:
         // 1. Сначала пробуем получить из кэша
         auto cached = lruCache_.Get(key);
         if (cached.has_value()) {
-            std::cout << "[STORAGE] Found in cache (LRU)" << std::endl;
             return cached; // Возвращаем AnyData из кэша
         }
 
         // 2. Если в кэше нет, ищем в основном хранилище
         std::shared_lock lock(storeMutex_);
-        std::cout << "[STORAGE] Get key from main store: " << key << std::endl;
         
         auto it = mainStore_.find(key);
         if (it != mainStore_.end()) {
@@ -141,6 +191,11 @@ public:
     bool Delete(const std::string& key) {
         std::unique_lock lock(storeMutex_);
         
+        // Сначала записываем в WAL
+        if (enable_wal_ && wal_manager_) {
+            wal_manager_->LogDelete(key);
+        }
+
         auto it = mainStore_.find(key);
         if (it == mainStore_.end()) {
             return false;

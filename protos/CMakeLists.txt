@@ -49,7 +49,7 @@ if(NOT SERVICE_SRCS OR NOT EXISTS "${CMAKE_BINARY_DIR}/protos/nosql_service.grpc
         OUTPUT ${GRPC_SRCS} ${GRPC_HDRS} ${SERVICE_PB_SRCS} ${SERVICE_PB_HDRS}
         COMMAND ${Protobuf_PROTOC_EXECUTABLE}
         ARGS
-            --cpp_out=${CMAKE_BINARY_DIR}/protos   # Добавлено!
+            --cpp_out=${CMAKE_BINARY_DIR}/protos
             --grpc_out=${CMAKE_BINARY_DIR}/protos
             --plugin=protoc-gen-grpc=${GRPC_CPP_PLUGIN}
             -I ${CMAKE_CURRENT_SOURCE_DIR}

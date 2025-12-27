@@ -27,7 +27,8 @@ void FileSegmentManager::Save(const std::unordered_map<std::string, AnyData>& da
 
     // Очищаем старые сегменты перед сохранением (для упрощенной версии)
     for (const auto& entry : fs::directory_iterator(base_path_)) {
-        if (entry.path().extension() == ".db") fs::remove(entry.path());
+        if (fs::is_regular_file(entry) && entry.path().extension() == ".db")
+            fs::remove(entry.path());
     }
 
     for (const auto& [key, value] : data) {
