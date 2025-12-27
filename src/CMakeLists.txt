@@ -31,7 +31,10 @@ target_sources(nosqldbtool PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/lib_version.cpp
 )
 
-target_link_libraries(nosqldbtool PUBLIC protos_tool ${Protobuf_LIBRARIES})
+target_link_libraries(nosqldbtool PUBLIC protos_tool 
+    ${Protobuf_LIBRARIES}
+    ${GRPC_SRCS} ${GRPC_HDRS} ${SERVICE_PB_SRCS} ${SERVICE_PB_HDRS}
+)
 
 # Исполняемый файл
 add_executable(nosqldb main.cpp)
@@ -46,8 +49,8 @@ set_target_properties(nosqldb nosqldbtool PROPERTIES
 target_link_libraries(nosqldb PRIVATE 
     nosqldbtool
     protos_tool
-    # gRPC::grpc++
-    # gRPC::grpc
+    gRPC::grpc++ 
+    protobuf::libprotobuf
 )
 
 # Создаем исполняемый файл сервера

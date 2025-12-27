@@ -14,6 +14,7 @@ add_executable(unit_google_tests
 	test_Protobuf.cpp
 	test_Persistence.cpp
 	test_NetworkIntegration.cpp
+	test_WalManager.cpp
 	test_main_gtest.cpp
 )
 
