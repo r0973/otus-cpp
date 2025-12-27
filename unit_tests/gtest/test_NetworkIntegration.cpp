@@ -2,8 +2,8 @@
 #include <grpcpp/grpcpp.h>
 #include <thread>
 #include <filesystem>
-#include "nosqldb/network/NoSQLServiceImpl.h"
-#include "nosqldb/network/NoSQLClient.h"
+#include "NoSQLServiceImpl.h"
+#include "NoSQLClient.h"
 
 namespace fs = std::filesystem;
 

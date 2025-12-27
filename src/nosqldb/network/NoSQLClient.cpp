@@ -1,4 +1,4 @@
-#include "nosqldb/network/NoSQLClient.h"
+#include "NoSQLClient.h"
 
 namespace nosqldb {
 
