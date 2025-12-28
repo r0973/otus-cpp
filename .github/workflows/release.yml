@@ -68,6 +68,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./nosql_storage-0.0.${{ github.run_number }}-Linux.deb
-          asset_name: nosql_storage-0.0.${{ github.run_number }}-Linux.deb
+          asset_path: ./nosqldb-0.0.${{ github.run_number }}-Linux.deb
+          asset_name: nosqldb-0.0.${{ github.run_number }}-Linux.deb
           asset_content_type: application/vnd.debian.binary-package
