@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - feature/async_bulk_parser
     tags:
       - 'v*'
 jobs:
