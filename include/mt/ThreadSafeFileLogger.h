@@ -1,3 +1,4 @@
+// ThreadSafeFileLogger.h
 #pragma once
 
 #include "FileLogger.h"
@@ -6,37 +7,38 @@
 #include <ctime>
 #include <chrono>
 #include <sstream>
+#include <atomic>
+#include <thread>
+#include <unistd.h>  // для getpid()
 
 class ThreadSafeFileLogger : public FileLogger
 {
 private:
-    std::string filename;
-    int thread_id; // ID потока
+    int thread_id;
+    static std::atomic<int> global_counter;
 
 public:
-    ThreadSafeFileLogger(int id) : thread_id(id)
-    {
-        filename = LogName(); 
-    }
-    
+    ThreadSafeFileLogger(int id) : thread_id(id) {}
     ~ThreadSafeFileLogger() override = default;
 
 protected:
     std::string LogName() override
     {
+        auto now = std::chrono::system_clock::now();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(
+            now.time_since_epoch()
+        );
+        auto micros = std::chrono::duration_cast<std::chrono::microseconds>(
+            now.time_since_epoch() % std::chrono::seconds(1)
+        );
+        
         std::stringstream ss;
-        std::string baseName = FileLogger::LogName(); 
-        size_t dotPos = baseName.find_last_of('.');
-        if (dotPos == std::string::npos)
-        {
-            ss << baseName << "_thread" << thread_id << ".log";
-        }
-        else
-        {
-            ss << baseName.substr(0, dotPos);
-            ss << "_thread" << thread_id;
-            ss << baseName.substr(dotPos);
-        }
+        ss << "bulk_"
+           << getpid() << "_"                    // PID процесса
+           << thread_id << "_"                   // ID потока (1 или 2)
+           << ms.count() << "_"                  // миллисекунды
+           << micros.count() << "_"              // микросекунды
+           << global_counter++ << ".log";        // глобальный счетчик
         
         return ss.str();
     }
@@ -44,11 +46,17 @@ protected:
 public:
     void update(const std::vector<Command>& commands) override
     {
-        std::ofstream ofs{filename, std::ios_base::app}; 
-
+        if (commands.empty()) return;
+        
+        std::string filename = LogName();  // НОВОЕ имя для каждого блока!
+        std::ofstream ofs{filename};
+        
         for (const auto& cmd : commands)
         {
-            ofs << cmd.getCmd() << std::endl;
+            if (cmd.shouldBeProcessed())  // только обычные команды
+            {
+                ofs << cmd.getCmd() << std::endl;
+            }
         }
     }
 };

@@ -15,11 +15,17 @@ public:
 protected:
     virtual std::string LogName()
 	{
-        auto now = std::chrono::system_clock::now();
-        auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()) % 1000;
-        std::time_t now_time = std::chrono::system_clock::to_time_t(now);
+        using namespace std::chrono;
+        auto now = system_clock::now();
+        auto now_time = system_clock::to_time_t(now);
+        
+        // Наносекунды для большей уникальности
+        auto nanos = duration_cast<nanoseconds>(
+            now.time_since_epoch() % seconds(1)
+        );
+        
         std::stringstream ss;
-        ss << "bulk" << now_time << milliseconds.count() << ".log";
+        ss << "bulk_" << now_time << "_" << nanos.count() << ".log";
         return ss.str();
     }
 

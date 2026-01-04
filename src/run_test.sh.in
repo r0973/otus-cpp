@@ -1,13 +1,14 @@
 #!/bin/bash
 
+# --- Настройка путей ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$SCRIPT_DIR"
+LIB_DIR="$SCRIPT_DIR/../lib"
 
-# --- Настройка путей ---
-BULK_EXECUTABLE="@CMAKE_INSTALL_PREFIX@/bin/bulk"
+BULK_EXECUTABLE="$SCRIPT_DIR/bulk"
 
 # Добавляем путь к каталогу библиотек в LD_LIBRARY_PATH
-export LD_LIBRARY_PATH="@CMAKE_INSTALL_PREFIX@/lib:$LD_LIBRARY_PATH"
+export LD_LIBRARY_PATH=$LIB_DIR:$LD_LIBRARY_PATH
 
 # --- Подготовка: Очистка предыдущих логов и данных ---
 rm -f bulk*.log console_client*.log input_client*.txt

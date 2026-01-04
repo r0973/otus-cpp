@@ -13,6 +13,8 @@
 
 class Dispatcher
 {
+private:
+    std::atomic<bool> stopped{false};
 	
 public:
     Dispatcher();

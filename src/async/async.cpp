@@ -2,92 +2,77 @@
 #include "AsyncLoggerAdaptor.h"
 #include "Dispatcher.h"
 #include "BulkProcessor.h"
-#include <mutex>
+#include <unordered_map>
 #include <memory>
-
-// Глобальные объекты для смешивания статических команд
-static std::shared_ptr<Dispatcher> global_dispatcher = std::make_shared<Dispatcher>();
-static std::shared_ptr<BulkProcessor> global_processor = nullptr;
-static std::mutex global_mtx;
+#include <mutex>
 
 struct ContextState
 {
     size_t bulk_size;
-    std::shared_ptr<BulkProcessor> local_processor; // Для динамических блоков
-    bool is_dynamic = false;
-    int nesting_level = 0;
-
-    ContextState(size_t size)
-    : bulk_size(size)
-    {}
+    std::shared_ptr<BulkProcessor> processor;
+    std::shared_ptr<Dispatcher> dispatcher;
+    std::shared_ptr<AsyncLoggerAdapter> adapter;
+    std::mutex mutex;
+    
+    ContextState(size_t size) : bulk_size(size)
+    {
+        dispatcher = std::make_shared<Dispatcher>();
+        processor = std::make_shared<BulkProcessor>(bulk_size);
+        adapter = std::make_shared<AsyncLoggerAdapter>(dispatcher);
+        processor->attach(adapter);
+    }
 };
+
+static std::unordered_map<void*, std::unique_ptr<ContextState>> contexts;
+static std::mutex contexts_mutex;
 
 void* connect(size_t bulkSize)
 {
-    std::lock_guard<std::mutex> lock(global_mtx);
-    if (!global_processor)
-    {
-        global_processor = std::make_shared<BulkProcessor>(bulkSize);
-        auto adapter = std::make_shared<AsyncLoggerAdapter>(global_dispatcher);
-        global_processor->attach(adapter);
-    }
-    return new ContextState(bulkSize);
+    auto ctx = std::make_unique<ContextState>(bulkSize);
+    void* handle = ctx.get();
+    
+    std::lock_guard<std::mutex> lock(contexts_mutex);
+    contexts[handle] = std::move(ctx);
+    
+    return handle;
 }
 
-void receive(void* context, const char* buffer, size_t size)
+void receive(void* handle, const char* data, size_t size)
 {
-    auto state = static_cast<ContextState*>(context);
-    std::string cmd_str(buffer, size);
-    if (cmd_str.empty())
-        return;
-
-    Command cmd(cmd_str);
-
-    if (cmd.isBlockStart())
+    ContextState* ctx = nullptr;
+    
     {
-        if (!state->is_dynamic)
-        {
-            state->is_dynamic = true;
-            // Создаем локальный процессор для динамического блока
-            state->local_processor = std::make_shared<BulkProcessor>(state->bulk_size);
-            state->local_processor->attach(std::make_shared<AsyncLoggerAdapter>(global_dispatcher));
-        }
-        state->nesting_level++;
+        std::lock_guard<std::mutex> lock(contexts_mutex);
+        auto it = contexts.find(handle);
+        if (it == contexts.end()) return;
+        ctx = it->second.get();
     }
-
-    if (state->is_dynamic)
-    {
-        state->local_processor->ProcessCommand(cmd);
-        if (cmd.isBlockEnd())
-        {
-            state->nesting_level--;
-            if (state->nesting_level == 0)
-            {
-                state->is_dynamic = false;
-                state->local_processor->Finish();
-                state->local_processor.reset();
-            }
-        }
-    }
-    else
-    {
-        // Статический режим: используем ОБЩИЙ процессор с мьютексом
-        std::lock_guard<std::mutex> lock(global_mtx);
-        global_processor->ProcessCommand(cmd);
-    }
+    
+    if (!ctx) return;
+    
+    std::string cmd_str(data, size);
+    if (cmd_str.empty()) return;
+    
+    Command cmd{cmd_str};
+    
+    std::lock_guard<std::mutex> lock(ctx->mutex);
+    ctx->processor->ProcessCommand(cmd);
 }
 
-void disconnect(void* context)
+void disconnect(void* handle)
 {
-    auto state = static_cast<ContextState*>(context);
-    if (state->is_dynamic)
+    std::unique_ptr<ContextState> ctx;
+    
     {
-        // Динамические блоки при разрыве выбрасываются (по заданию 7)
+        std::lock_guard<std::mutex> lock(contexts_mutex);
+        auto it = contexts.find(handle);
+        if (it == contexts.end()) return;
+        ctx = std::move(it->second);
+        contexts.erase(it);
     }
-    else
-    {
-        // Проверяем, нужно ли сбросить статический блок (если это был последний клиент)
-        // В рамках данного задания статический блок сбросится по заполнению или по завершению сервера
+    
+    if (ctx) {
+        std::lock_guard<std::mutex> lock(ctx->mutex);
+        ctx->processor->Finish();
     }
-    delete state;
 }

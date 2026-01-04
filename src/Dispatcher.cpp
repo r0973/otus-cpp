@@ -34,6 +34,7 @@ Dispatcher::~Dispatcher()
 
 void Dispatcher::stop()
 {
+    stopped = true;
     logQueue->push({});
     fileQueue->push({});
     fileQueue->push({});
@@ -63,12 +64,14 @@ void Dispatcher::logThreadFunc()
 void Dispatcher::fileThreadFunc1()
 {
     ThreadSafeFileLogger logger{1};
-    while (true)
+    while (!stopped)
     {
         std::vector<Command> commands;
-        fileQueue->wait_and_pop(commands);
-        if (commands.empty())
-            break;
+        if (!fileQueue->try_pop(commands)) {
+            std::this_thread::yield();
+            continue;
+        }
+        if (commands.empty()) break;
         logger.update(commands);
     }
 }
@@ -76,12 +79,14 @@ void Dispatcher::fileThreadFunc1()
 void Dispatcher::fileThreadFunc2()
 {
     ThreadSafeFileLogger logger{2};
-    while (true)
+    while (!stopped)
     {
         std::vector<Command> commands;
-        fileQueue->wait_and_pop(commands);
-        if (commands.empty())
-            break;
+        if (!fileQueue->try_pop(commands)) {
+            std::this_thread::yield();
+            continue;
+        }
+        if (commands.empty()) break;
         logger.update(commands);
     }
 }
