@@ -1,0 +1,79 @@
+#!/bin/bash
+
+# 1. Настройка путей
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+# Обычно если скрипт в install/bin, то сервер рядом, а либы в ../lib
+SERVER_BIN="$SCRIPT_DIR/bulk_server"
+LIB_DIR="$SCRIPT_DIR/../lib"
+
+# 2. Экспорт пути к библиотекам, чтобы сервер их увидел
+export LD_LIBRARY_PATH=$LIB_DIR:$LD_LIBRARY_PATH
+
+# Настройки
+PORT=10001
+BULK_SIZE=3
+
+# 3. Очистка окружения
+killall bulk_server 2>/dev/null
+rm -f bulk*.log
+echo "--- Подготовка завершена ---"
+
+# 4. Запуск сервера
+# Проверяем, существует ли файл
+if [ ! -f "$SERVER_BIN" ]; then
+    echo "Ошибка: $SERVER_BIN не найден"
+    exit 1
+fi
+
+$SERVER_BIN $PORT $BULK_SIZE &
+SERVER_PID=$!
+
+# Даем время серверу открыться и проверяем, что он не упал
+sleep 1
+if ! kill -0 $SERVER_PID 2>/dev/null; then
+    echo "Ошибка: сервер не запустился. Проверьте порт $PORT"
+    exit 1
+fi
+
+echo "--- Тест 1: Смешивание команд из двух соединений ---"
+
+# 5. Запускаем два клиента одновременно и сохраняем их PID
+(seq 0 9 | nc localhost $PORT -q 1) &
+CLIENT1_PID=$!
+
+(seq 10 19 | nc localhost $PORT -q 1) &
+CLIENT2_PID=$!
+
+# 6. Ждем завершения обоих клиентов и обработки данных сервером
+wait $CLIENT1_PID $CLIENT2_PID
+
+# Даем серверу немного времени, чтобы дозаписать последние файлы после EOF
+sleep 2
+
+# 7. Завершаем сервер ПЕРЕД подсчетом результатов
+# Это гарантирует, что деструкторы сработали и файлы закрыты
+kill $SERVER_PID
+wait $SERVER_PID 2>/dev/null
+
+# 8. Подсчет результатов
+LOG_COUNT=$(ls bulk*.log 2>/dev/null | wc -l)
+echo "Всего команд отправлено: 20"
+echo "Размер блока (bulk_size): $BULK_SIZE"
+echo "Ожидаемое количество файлов: 7"
+echo "Фактически создано файлов: $LOG_COUNT"
+
+# 9. Проверка содержимого
+if [ "$LOG_COUNT" -gt 0 ]; then
+    echo "Пример содержимого одного из файлов:"
+    FILE_EXAMPLE=$(ls bulk*.log | head -n 1)
+    echo "$FILE_EXAMPLE: $(cat $FILE_EXAMPLE)"
+fi
+
+# 10. Итоговый вердикт
+if [ "$LOG_COUNT" -eq 7 ]; then
+    echo "РЕЗУЛЬТАТ: УСПЕХ ✅"
+    exit 0
+else
+    echo "РЕЗУЛЬТАТ: ОШИБКА ❌ (неверное количество блоков)"
+    exit 1
+fi

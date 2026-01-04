@@ -18,6 +18,7 @@ target_include_directories(async
 # Добавляем файлы для сборки
 target_sources(async PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/mt/Dispatcher.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/mt/ThreadSafeFileLogger.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/async/async.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/lib_version.cpp
 )
@@ -63,8 +64,17 @@ configure_file(
     @ONLY
 )
 
+# Установка вспомогательного скрипта
+configure_file(
+    "${CMAKE_SOURCE_DIR}/src/check_bulk_server.sh.in" # Путь к шаблону
+    "${CMAKE_BINARY_DIR}/bin/check_bulk_server.sh"    # Путь, куда сгенерировать скрипт в каталоге сборки
+    @ONLY
+)
+
 # Установка скрипта
-install(FILES "${CMAKE_BINARY_DIR}/bin/run_test.sh"
+install(FILES 
+    "${CMAKE_BINARY_DIR}/bin/run_test.sh"
+    "${CMAKE_BINARY_DIR}/bin/check_bulk_server.sh"
     DESTINATION ${CMAKE_INSTALL_PREFIX}/bin  # Целевой каталог установки (например, /usr/local/bin)
     PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE
 )
