@@ -18,12 +18,13 @@ class Session : public std::enable_shared_from_this<Session>
 {
 public:
     Session(tcp::socket socket, size_t bulk_size)
-        : socket_(std::move(socket))
-        , bulk_size_(bulk_size)
+    : socket_(std::move(socket))
+    , bulk_size_(bulk_size)
     {
         // Инициализируем общий статический процессор при первом соединении
         std::lock_guard<std::mutex> lock(g_static_mutex);
-        if (!g_static_processor) {
+        if (!g_static_processor)
+        {
             g_dispatcher = std::make_shared<Dispatcher>();
             g_static_processor = std::make_shared<BulkProcessor>(bulk_size);
             auto adapter = std::make_shared<AsyncLoggerAdapter>(g_dispatcher);
@@ -50,7 +51,8 @@ private:
     {
         auto self(shared_from_this());
         boost::asio::async_read_until(socket_, buffer_, '\n',
-            [this, self](boost::system::error_code ec, [[maybe_unused]] std::size_t length) {
+            [this, self](boost::system::error_code ec, [[maybe_unused]] std::size_t length)
+            {
                 if (!ec)
                 {
                     std::istream is(&buffer_);
