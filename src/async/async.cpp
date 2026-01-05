@@ -14,7 +14,8 @@ struct ContextState
     std::shared_ptr<AsyncLoggerAdapter> adapter;
     std::mutex mutex;
     
-    ContextState(size_t size) : bulk_size(size)
+    ContextState(size_t size)
+    : bulk_size(size)
     {
         dispatcher = std::make_shared<Dispatcher>();
         processor = std::make_shared<BulkProcessor>(bulk_size);
@@ -44,14 +45,18 @@ void receive(void* handle, const char* data, size_t size)
     {
         std::lock_guard<std::mutex> lock(contexts_mutex);
         auto it = contexts.find(handle);
-        if (it == contexts.end()) return;
+        if (it == contexts.end())
+            return;
         ctx = it->second.get();
     }
     
-    if (!ctx) return;
+    if (!ctx)
+        return;
     
     std::string cmd_str(data, size);
-    if (cmd_str.empty()) return;
+    
+    if (cmd_str.empty())
+        return;
     
     Command cmd{cmd_str};
     
@@ -66,12 +71,14 @@ void disconnect(void* handle)
     {
         std::lock_guard<std::mutex> lock(contexts_mutex);
         auto it = contexts.find(handle);
-        if (it == contexts.end()) return;
+        if (it == contexts.end())
+            return;
         ctx = std::move(it->second);
         contexts.erase(it);
     }
     
-    if (ctx) {
+    if (ctx)
+    {
         std::lock_guard<std::mutex> lock(ctx->mutex);
         ctx->processor->Finish();
     }

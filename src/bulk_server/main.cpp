@@ -51,7 +51,8 @@ private:
         auto self(shared_from_this());
         boost::asio::async_read_until(socket_, buffer_, '\n',
             [this, self](boost::system::error_code ec, [[maybe_unused]] std::size_t length) {
-                if (!ec) {
+                if (!ec)
+                {
                     std::istream is(&buffer_);
                     std::string line;
                     std::getline(is, line);
@@ -66,7 +67,8 @@ private:
                 else
                 {
                     // При закрытии соединения завершаем динамический блок
-                    if (in_dynamic_block_ && dynamic_processor_) {
+                    if (in_dynamic_block_ && dynamic_processor_)
+                    {
                         in_dynamic_block_ = false;
                         dynamic_processor_.reset();
                     }
@@ -76,11 +78,14 @@ private:
 
     void process_line(const std::string& line)
     {
-        if (line.empty()) return;
+        if (line.empty())
+            return;
 
-        if (line == "{") {
+        if (line == "{")
+        {
             // Начало динамического блока
-            if (!in_dynamic_block_) {
+            if (!in_dynamic_block_)
+            {
                 in_dynamic_block_ = true;
                 dynamic_processor_ = std::make_shared<BulkProcessor>(bulk_size_);
                 auto adapter = std::make_shared<AsyncLoggerAdapter>(std::make_shared<Dispatcher>());
@@ -88,36 +93,45 @@ private:
             }
             dynamic_processor_->ProcessCommand(Command{line});
         }
-        else if (line == "}") {
+        else if (line == "}")
+        {
             // Конец динамического блока
-            if (in_dynamic_block_ && dynamic_processor_) {
+            if (in_dynamic_block_ && dynamic_processor_)
+            {
                 dynamic_processor_->ProcessCommand(Command{line});
-                if (--dynamic_nesting_level_ == 0) {
+                if (--dynamic_nesting_level_ == 0)
+                {
                     dynamic_processor_->Finish();
                     in_dynamic_block_ = false;
                     dynamic_processor_.reset();
                 }
             }
         }
-        else if (in_dynamic_block_) {
+        else if (in_dynamic_block_)
+        {
             // Команда внутри динамического блока
-            if (dynamic_processor_) {
+            if (dynamic_processor_)
+            {
                 dynamic_processor_->ProcessCommand(Command{line});
             }
         }
-        else {
+        else
+        {
             // Статическая команда - используем ОБЩИЙ процессор
             std::lock_guard<std::mutex> lock(g_static_mutex);
-            if (g_static_processor) {
+            if (g_static_processor)
+            {
                 g_static_processor->ProcessCommand(Command{line});
             }
         }
 
         // Обработка вложенности динамических блоков
-        if (line == "{") {
+        if (line == "{")
+        {
             dynamic_nesting_level_++;
         }
-        else if (line == "}") {
+        else if (line == "}")
+        {
             dynamic_nesting_level_ = std::max(0, dynamic_nesting_level_ - 1);
         }
     }
@@ -136,8 +150,8 @@ class Server
 {
 public:
     Server(boost::asio::io_context& io_context, short port, size_t bulk_size)
-        : acceptor_(io_context, tcp::endpoint(tcp::v4(), port))
-        , bulk_size_(bulk_size)
+    : acceptor_(io_context, tcp::endpoint(tcp::v4(), port))
+    , bulk_size_(bulk_size)
     {
         do_accept();
     }
@@ -145,12 +159,16 @@ public:
 private:
     void do_accept()
     {
-        acceptor_.async_accept([this](boost::system::error_code ec, tcp::socket socket) {
-            if (!ec) {
-                std::make_shared<Session>(std::move(socket), bulk_size_)->start();
+        acceptor_.async_accept(
+            [this](boost::system::error_code ec, tcp::socket socket)
+            {
+                if (!ec)
+                {
+                    std::make_shared<Session>(std::move(socket), bulk_size_)->start();
+                }
+                do_accept();
             }
-            do_accept();
-        });
+        );
     }
 
     tcp::acceptor acceptor_;
@@ -161,15 +179,18 @@ private:
 void finish_static_processor()
 {
     std::lock_guard<std::mutex> lock(g_static_mutex);
-    if (g_static_processor) {
+    if (g_static_processor)
+    {
         g_static_processor->Finish();
     }
 }
 
 int main(int argc, char* argv[])
 {
-    try {
-        if (argc != 3) {
+    try
+    {
+        if (argc != 3)
+        {
             std::cerr << "Usage: bulk_server <port> <bulk_size>\n";
             return 1;
         }
@@ -182,16 +203,20 @@ int main(int argc, char* argv[])
         
         // Обработка сигналов
         boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
-        signals.async_wait([&](boost::system::error_code, int) {
-            finish_static_processor();
-            // Даем диспетчеру время дозаписать логи
-            std::this_thread::sleep_for(std::chrono::milliseconds(500));
-            io_context.stop();
-        });
+        signals.async_wait(
+            [&](boost::system::error_code, int)
+            {
+                finish_static_processor();
+                // Даем диспетчеру время дозаписать логи
+                std::this_thread::sleep_for(std::chrono::milliseconds(500));
+                io_context.stop();
+            }
+        );
 
         io_context.run();
     }
-    catch(std::exception& e) {
+    catch(std::exception& e)
+    {
         std::cerr << "Exception: " << e.what() << "\n";
     }
 
