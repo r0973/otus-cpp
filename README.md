@@ -1,4 +1,4 @@
-# Проект Асинхронная сетевая обработка команд (Async Network Bulk Processor)
+# ДЗ-10. Асинхронная сетевая обработка команд (Async Network Bulk Processor)
 
 ## Описание проекта
 
