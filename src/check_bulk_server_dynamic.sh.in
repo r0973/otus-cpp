@@ -1,0 +1,101 @@
+#!/bin/bash
+
+# 1. Настройка путей
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE}" )" && pwd )"
+SERVER_BIN="$SCRIPT_DIR/bulk_server"
+LIB_DIR="$SCRIPT_DIR/../lib"
+export LD_LIBRARY_PATH=$LIB_DIR:$LD_LIBRARY_PATH
+
+PORT=10002
+BULK_SIZE=3
+
+clean_logs() { rm -f bulk*.log; }
+
+# Очистка перед стартом
+killall bulk_server 2>/dev/null
+clean_logs
+echo "--- Подготовка завершена ---"
+
+# 2. Запуск сервера
+$SERVER_BIN $PORT $BULK_SIZE &
+SERVER_PID=$!
+sleep 1
+
+# --- ТЕСТ 1 ---
+echo "--- Тест 1: Изоляция динамики ---"
+clean_logs
+{ echo "{"; echo "test1_a"; echo "test1_b"; echo "}"; } | nc localhost $PORT -q 1 &
+P1=$!
+{ echo "{"; echo "test2_a"; echo "test2_b"; echo "}"; } | nc localhost $PORT -q 1 &
+P2=$!
+wait $P1 $P2
+sleep 1
+if grep -l "test1_a" bulk*.log 2>/dev/null | xargs grep -q "test2_a" 2>/dev/null; then
+    echo "❌ ОШИБКА: Блоки смешались!"
+else
+    echo "✅ Динамические блоки изолированы"
+fi
+
+# --- ТЕСТ 2 ---
+echo "--- Тест 2: Вложенность ---"
+clean_logs
+{ echo "{"; echo "in1"; echo "{"; echo "in2"; echo "in3"; echo "}"; echo "in4"; echo "}"; } | nc localhost $PORT -q 1 &
+P3=$!
+wait $P3
+sleep 1
+NESTED_FILE=$(grep -l "in1" bulk*.log 2>/dev/null | xargs grep -l "in2" 2>/dev/null | xargs grep -l "in3" 2>/dev/null | xargs grep -l "in4" 2>/dev/null)
+[ -n "$NESTED_FILE" ] && echo "✅ Вложенность верно" || echo "❌ ОШИБКА: Вложенность"
+
+echo "--- Тест 3: Разрыв соединения ---"
+clean_logs
+(echo "{"; echo "break1"; echo "break2"; sleep 2) | nc localhost $PORT &
+NC_PID=$!
+sleep 0.5 && kill $NC_PID 2>/dev/null
+wait $NC_PID 2>/dev/null
+sleep 1
+
+# По ТЗ файл НЕ должен быть создан
+if ls bulk*.log 1> /dev/null 2>&1; then
+    echo "❌ ОШИБКА: Незавершенный динамический блок был сохранен (а должен быть выброшен)!"
+else
+    echo "✅ Незавершенный динамический блок успешно проигнорирован"
+fi
+
+# --- ТЕСТ 4 ---
+echo "--- Тест 4: Смешивание статики ---"
+clean_logs
+# Запускаем клиентов и сохраняем их PID, чтобы wait не ждал сервер
+echo "s1" | nc localhost $PORT -q 1 &
+P4=$!
+echo "s2" | nc localhost $PORT -q 1 &
+P5=$!
+echo "s3" | nc localhost $PORT -q 1 &
+P6=$!
+
+# Ожидаем только завершения клиентов!
+wait $P4 $P5 $P6
+
+FOUND_S=false
+for i in {1..30}; do
+    MATCH_S=$(grep -l "s1" bulk*.log 2>/dev/null | xargs grep -l "s2" 2>/dev/null | xargs grep -l "s3" 2>/dev/null)
+    if [ -n "$MATCH_S" ]; then
+        FOUND_S=true; break
+    fi
+    sleep 0.1
+done
+
+if [ "$FOUND_S" = true ]; then
+    echo "✅ Статика смешалась: $(basename $MATCH_S)"
+else
+    echo "--- Остановка сервера для сброса ---"
+    kill $SERVER_PID
+    wait $SERVER_PID 2>/dev/null
+    sleep 1
+    MATCH_S=$(grep -l "s1" bulk*.log 2>/dev/null | xargs grep -l "s2" | xargs grep -l "s3")
+    [ -n "$MATCH_S" ] && echo "✅ Статика смешалась после SIGTERM" || echo "❌ Ошибка статики"
+fi
+
+echo "=== ТЕСТЫ ЗАВЕРШЕНЫ ==="
+# Убиваем сервер, если он еще жив (после успешного теста 4 он может быть жив)
+kill $SERVER_PID 2>/dev/null
+wait $SERVER_PID 2>/dev/null
