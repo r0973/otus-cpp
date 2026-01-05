@@ -33,7 +33,7 @@ add_executable(bulk main.cpp)
 target_link_libraries(bulk PRIVATE async)
 
 # Создаем цель для bulk_server
-add_executable(bulk_server bulk_server/main.cpp)
+add_executable(bulk_server server/main.cpp)
 
 # Пробрасываем заголовочные файлы
 target_include_directories(bulk_server PRIVATE ${PROJECT_INCLUDE_DIRS})
