@@ -38,8 +38,9 @@ public:
 
     ~Session()
     {
-        // Завершаем динамический блок если он активен
-        if (in_dynamic_block_ && dynamic_processor_) {
+        // Завершаем динамический блок если есть
+        if (in_dynamic_block_ && dynamic_processor_)
+        {
             dynamic_processor_->Finish();
         }
     }
@@ -62,11 +63,10 @@ private:
                     process_line(line);
                     do_read();
                 }
-                // При закрытии соединения завершаем динамический блок
-                else if (ec == boost::asio::error::eof || 
-                         ec == boost::asio::error::connection_reset) {
+                else
+                {
+                    // При закрытии соединения завершаем динамический блок
                     if (in_dynamic_block_ && dynamic_processor_) {
-                        dynamic_processor_->Finish();
                         in_dynamic_block_ = false;
                         dynamic_processor_.reset();
                     }
@@ -184,6 +184,8 @@ int main(int argc, char* argv[])
         boost::asio::signal_set signals(io_context, SIGINT, SIGTERM);
         signals.async_wait([&](boost::system::error_code, int) {
             finish_static_processor();
+            // Даем диспетчеру время дозаписать логи
+            std::this_thread::sleep_for(std::chrono::milliseconds(500));
             io_context.stop();
         });
 
