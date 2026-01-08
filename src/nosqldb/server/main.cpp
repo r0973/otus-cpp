@@ -9,7 +9,7 @@ void RunServer(const std::string& db_path, const std::string& port, const nosqld
     
     // 1. Инициализация логгера
     if ( config.enableLogging ) {
-        nosqldb::Logger::GetInstance().Initialize(db_path + "/" + "server.log", config.logLevel);
+        nosqldb::Logger::GetInstance().Initialize("server.log", config.logLevel);
         nosqldb::Logger::GetInstance().Log(nosqldb::LogLevel::INFO, "Starting NoSQL server...");
     }
     std::string server_address("0.0.0.0:" + port);

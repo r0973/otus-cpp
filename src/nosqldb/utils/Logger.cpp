@@ -13,6 +13,7 @@ namespace nosqldb {
 
 Logger::~Logger() {
     if (fileStream_) {
+        fileStream_->flush();
         fileStream_->close();
     }
 }
