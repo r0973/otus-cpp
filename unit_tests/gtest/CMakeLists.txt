@@ -15,6 +15,8 @@ add_executable(unit_google_tests
 	test_Persistence.cpp
 	test_NetworkIntegration.cpp
 	test_WalManager.cpp
+	test_FileSegmentManager.cpp
+	test_Index.cpp
 	test_main_gtest.cpp
 )
 

@@ -9,8 +9,8 @@ namespace nosqldb {
 class DiskStorage : public MemoryStorage {
 public:
     explicit DiskStorage(const StorageConfig& config)
-        : MemoryStorage(config),
-          segment_manager_(config.dataDirectory, config.maxSegmentSize)
+        : MemoryStorage(config)
+        , segment_manager_(config.dataDirectory, config.maxSegmentSize)
     {
         // 1. Загружаем стабильный снимок с диска (Snapshot)
         Restore();

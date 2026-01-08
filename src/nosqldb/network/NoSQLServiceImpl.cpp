@@ -35,8 +35,7 @@ grpc::Status NoSQLServiceImpl::Get([[maybe_unused]] grpc::ServerContext* context
 								+ request->db_name()
 							    + ", key=" + request->key());
 
-		auto* db = manager_.OpenStorage(request->db_name(), StorageConfig{});
-		// auto result = db->Get<AnyData>(request->key());
+		auto* db = manager_.OpenStorage(request->db_name(), config_);
 		auto result = db->GetAnyData(request->key()); 
 
 		if (result.has_value()) {
@@ -82,7 +81,7 @@ grpc::Status NoSQLServiceImpl::Delete([[maybe_unused]] grpc::ServerContext* cont
                                      const ::nosqldb::proto::DeleteRequest* request,
                                      [[maybe_unused]] ::google::protobuf::Empty* response) {
     try {
-        auto* db = manager_.OpenStorage(request->db_name(), StorageConfig{});
+        auto* db = manager_.OpenStorage(request->db_name(), config_);
         db->Delete(request->key());
         return grpc::Status::OK;
     } catch (const std::exception& e) {

@@ -23,22 +23,26 @@ DiskStorage* StorageManager::OpenStorage(const std::string& name, const StorageC
     
 	// Если база уже открыта — возвращаем её
     if (active_storages_.count(name)) {
-        Logger::GetInstance().Log(LogLevel::INFO, "[MANAGER] Returning existing storage" + name);
+        Logger::GetInstance().Log(LogLevel::INFO, "[MANAGER] OpenStorage: returning existing storage " + name);
 		return active_storages_[name].get();
     }
 
 	// Настраиваем конфиг для конкретной папки
     StorageConfig specific_config = config;
     specific_config.dataDirectory = get_storage_path(name);
+    Logger::GetInstance().Log(LogLevel::INFO, "[MANAGER] OpenStorage: specific dataDirectory " + specific_config.dataDirectory);
     specific_config.enablePersistence = true;
-
+    try {
+        // Создаём директорию, если её нет
+        std::filesystem::create_directories(specific_config.dataDirectory);
+    } catch (const std::filesystem::filesystem_error& e) {
+        throw std::runtime_error("Failed to create storage directory: " + std::string(e.what()));
+    }
     // Создаем новый экземпляр DiskStorage (он сам вызовет Restore в конструкторе)
     auto storage = std::make_unique<DiskStorage>(specific_config);
-    DiskStorage* ptr = storage.get();
     active_storages_[name] = std::move(storage);
-    Logger::GetInstance().Log(LogLevel::INFO, "[MANAGER] Creating new storage" + name);
-
-    return ptr;
+    Logger::GetInstance().Log(LogLevel::INFO, "[MANAGER] OpenStorage: creating new storage " + name);
+    return active_storages_[name].get();
 }
 
 bool StorageManager::CloseStorage(const std::string& name) {

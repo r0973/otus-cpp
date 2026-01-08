@@ -10,7 +10,8 @@ namespace nosqldb {
 namespace proto = nosqldb::proto;
 
 FileSegmentManager::FileSegmentManager(const std::string& base_path, size_t max_entries)
-    : base_path_(base_path), max_entries_(max_entries) {
+: base_path_(base_path)
+, max_entries_(max_entries) {
     if (!base_path_.empty()) {
         fs::create_directories(base_path_);
     }
@@ -24,35 +25,68 @@ void FileSegmentManager::Save(const std::unordered_map<std::string, AnyData>& da
     proto::StorageSegment current_segment;
     size_t segment_index = 0;
     size_t entry_count = 0;
+    std::vector<std::string> temp_files; // Список временных файлов для очистки при ошибке
 
-    // Очищаем старые сегменты перед сохранением (для упрощенной версии)
-    for (const auto& entry : fs::directory_iterator(base_path_)) {
-        if (fs::is_regular_file(entry) && entry.path().extension() == ".db")
-            fs::remove(entry.path());
-    }
+    try {
+        for (const auto& [key, value] : data) {
+            auto* entry = current_segment.add_entries();
+            entry->set_key(key);
+            *entry->mutable_value() = value.ToProto();
+            entry_count++;
 
-    for (const auto& [key, value] : data) {
-        auto* entry = current_segment.add_entries();
-        entry->set_key(key);
-        
-        // Превращаем AnyData в AnyDataProto
-        *entry->mutable_value() = value.ToProto(); 
+            // Если сегмент заполнен, записываем его во временный файл
+            if (entry_count >= max_entries_) {
+                std::string temp_path = get_segment_path(segment_index) + ".tmp";
+                temp_files.push_back(temp_path);
 
-        entry_count++;
-
-        // Если сегмент заполнен, записываем его и создаем новый
-        if (entry_count >= max_entries_) {
-            std::ofstream out(get_segment_path(segment_index++), std::ios::binary);
-            current_segment.SerializeToOstream(&out);
-            current_segment.Clear();
-            entry_count = 0;
+                std::ofstream out(temp_path, std::ios::binary);
+                if (!out) {
+                    throw std::runtime_error("Failed to open temp segment file: " + temp_path);
+                }
+                current_segment.SerializeToOstream(&out);
+                current_segment.Clear();
+                entry_count = 0;
+                segment_index++;
+            }
         }
-    }
 
-    // Записываем остатки данных
-    if (entry_count > 0) {
-        std::ofstream out(get_segment_path(segment_index), std::ios::binary);
-        current_segment.SerializeToOstream(&out);
+        // Записываем остатки данных во временный файл
+        if (entry_count > 0) {
+            std::string temp_path = get_segment_path(segment_index) + ".tmp";
+            temp_files.push_back(temp_path);
+
+            std::ofstream out(temp_path, std::ios::binary);
+            if (!out) {
+                throw std::runtime_error("Failed to open temp segment file: " + temp_path);
+            }
+            current_segment.SerializeToOstream(&out);
+        }
+
+        // Атомарно заменяем старые файлы на новые
+        for (size_t seg_idx = 0; seg_idx < segment_index + (entry_count > 0 ? 1 : 0); ++seg_idx) {
+            std::string temp_path = get_segment_path(seg_idx) + ".tmp";
+            std::string final_path = get_segment_path(seg_idx);
+
+            // Удаляем старый файл, если существует  
+            if (fs::exists(final_path)) {
+                fs::remove(final_path);
+            }
+
+            // Переименовываем временный файл
+            fs::rename(temp_path, final_path);
+        }
+
+        // Очищаем список временных файлов (уже переименованы)
+        temp_files.clear();
+
+    } catch (const std::exception& e) {
+        // В случае ошибки — удаляем временные файлы
+        for (const auto& temp_file : temp_files) {
+            if (fs::exists(temp_file)) {
+                fs::remove(temp_file);
+            }
+        }
+        throw; // Пробрасываем исключение дальше
     }
 }
 

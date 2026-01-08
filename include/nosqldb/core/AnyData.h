@@ -8,6 +8,7 @@
 #include <vector>
 #include <cstring>
 #include <cstdint>
+#include <google/protobuf/util/message_differencer.h>
 #include "protos/anydata.pb.h"
 
 namespace nosqldb
@@ -66,13 +67,52 @@ public:
     
     // 5. Деструктор
     ~AnyData() = default;
-    
+
+public:
+    // 6. Оператор равенства
+    bool operator==(const AnyData& other) const {
+        return Equals(other);
+    }
+
+public:
+    // 7. Оператор неравенства
+    bool operator!=(const AnyData& other) const {
+        return !(*this == other);
+    }
+
+private:
+    bool Equals(const AnyData& other) const {
+        if (type_ != other.type_) return false;
+        if (Empty() && other.Empty()) return true;
+        if (Is<int>()) return Get<int>() == other.Get<int>();
+        if (Is<double>()) return Get<double>() == other.Get<double>();
+        if (Is<std::string>()) return Get<std::string>() == other.Get<std::string>();
+        if (Is<bool>()) return Get<bool>() == other.Get<bool>();
+        
+        if (Is<data::User>()) {
+            return google::protobuf::util::MessageDifferencer::Equals(
+                Get<data::User>(), 
+                other.Get<data::User>()
+            );
+        }
+        if (Is<data::Product>()) {
+            return google::protobuf::util::MessageDifferencer::Equals(
+                Get<data::Product>(), 
+                other.Get<data::Product>()
+            );
+        }
+
+        return false; 
+    }
+
+public:    
     // Проверка типа
     template<typename T>
     bool Is() const {
         return type_ == typeid(T);
     }
-    
+
+public:
     // Получение значения
     template<typename T>
     T Get() const {
@@ -85,7 +125,8 @@ public:
             throw std::runtime_error(std::string("Type mismatch in AnyData: ") + e.what());
         }
     }
-    
+
+public:
     // Try-get (без исключения)
     template<typename T>
     bool TryGet(T& outValue) const {
@@ -97,42 +138,24 @@ public:
             return false;
         }
     }
-    
+
+public:
     // Сериализация
     std::vector<char> Serialize() const
     {
         return SerializeToProto();
     };
+
     static AnyData Deserialize(const std::vector<char>& data)
     {
         return DeserializeFromProto(data);
     };
-    
+
+public:
     // Информация
     const std::type_index& Type() const { return type_; }
     bool Empty() const { return !data_.has_value(); }
-    
-    // Сравнение (для тестов)
-    bool operator==(const AnyData& other) const {
-        if (type_ != other.type_)
-            return false;
-        // Для простых типов можно сравнить, для сложных - нужно реализовать
-        return false; // Упрощенно
-    }
-private:    
-    // Вспомогательные методы для сериализации
-    template<typename T>
-    static std::vector<char> SerializePOD(const T& value) {
-        std::vector<char> buffer(sizeof(T));
-        std::memcpy(buffer.data(), &value, sizeof(T));
-        return buffer;
-    }
-    
-    static std::vector<char> SerializeString(const std::string& str) {
-        std::vector<char> buffer(str.size());
-        std::memcpy(buffer.data(), str.data(), str.size());
-        return buffer;
-    }
+
 public:
     // Конвертация в protobuf
     nosqldb::proto::AnyDataProto ToProto() const {
@@ -141,6 +164,14 @@ public:
         if (Is<int>()) {
             proto.set_int_value(Get<int>());
             proto.set_type_name("int");
+        }
+        else if (Is<int64_t>()) {
+            proto.set_int64_value(Get<int64_t>());
+            proto.set_type_name("int64");
+        }
+        else if (Is<float>()) {
+            proto.set_float_value(Get<float>());
+            proto.set_type_name("float");
         }
         else if (Is<double>()) {
             proto.set_double_value(Get<double>());
@@ -154,6 +185,16 @@ public:
             proto.set_bool_value(Get<bool>());
             proto.set_type_name("bool");
         }
+        else if (Is<std::vector<char>>()) { // Binary data
+            const auto& vec = Get<std::vector<char>>();
+            proto.set_binary_data(vec.data(), vec.size());
+            proto.set_type_name("binary");
+        }
+        else if (Is<std::vector<int>>()) { // Списки
+            auto* list = proto.mutable_int_list();
+            for (int v : Get<std::vector<int>>()) list->add_values(v);
+            proto.set_type_name("int_list");
+        }
         else if (Is<data::User>()) {
             *proto.mutable_user() = Get<data::User>();
             proto.set_type_name("User");
@@ -162,42 +203,42 @@ public:
             *proto.mutable_product() = Get<data::Product>();
             proto.set_type_name("Product");
         }
-        // TODO: добавление остальных типов по аналогии.
         else {
-            throw std::runtime_error("Type not supported for protobuf: " + 
-                                   std::string(type_.name()));
+            throw std::runtime_error("Type not supported: " + std::string(type_.name()));
         }
 
         return proto;
     }
+
 public:
-// Создание из protobuf
+    // Создание из protobuf
     static AnyData FromProto(const nosqldb::proto::AnyDataProto& proto) {
         const std::string& type_name = proto.type_name();
 
-        if (type_name == "int") {
-            return AnyData(proto.int_value());
+        if (type_name == "int") return AnyData(proto.int_value());
+        if (type_name == "int64") return AnyData(proto.int64_value());
+        if (type_name == "float") return AnyData(proto.float_value());
+        if (type_name == "double") return AnyData(proto.double_value());
+        if (type_name == "string") return AnyData(proto.string_value());
+        if (type_name == "bool") return AnyData(proto.bool_value());
+
+        if (type_name == "binary") {
+            const std::string& data = proto.binary_data();
+            return AnyData(std::vector<char>(data.begin(), data.end()));
         }
-        else if (type_name == "double") {
-            return AnyData(proto.double_value());
+
+        if (type_name == "int_list") {
+            std::vector<int> res;
+            for (int v : proto.int_list().values()) res.push_back(v);
+            return AnyData(res);
         }
-        else if (type_name == "string") {
-            return AnyData(proto.string_value());
-        }
-        else if (type_name == "bool") {
-            return AnyData(proto.bool_value());
-        }
-        else if (type_name == "User") {
-            return AnyData(proto.user());
-        }
-        else if (type_name == "Product") {
-            return AnyData(proto.product());
-        }
-        // TODO: добавление остальных типов по аналогии.
-        else {
-            throw std::runtime_error("Unknown protobuf type: " + type_name);
-        }
+
+        if (type_name == "User") return AnyData(proto.user());
+        if (type_name == "Product") return AnyData(proto.product());
+
+        throw std::runtime_error("Unknown protobuf type: " + type_name);
     }
+
 public:
     // Сериализация через protobuf
     std::vector<char> SerializeToProto() const {

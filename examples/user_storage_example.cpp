@@ -1,36 +1,16 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 #include "NoSQLDataBase.h"
+#include "protos/user.pb.h"
+#include "protos/product.pb.h"
 
 using namespace nosqldb;
 
-struct User
-{
-    int id;
-    std::string name;
-    std::string email;
-    int age;
-    std::string city;
-    
-    bool operator==(const User& other) const
-    {
-        return id == other.id;
-    }
-};
-
-struct Product
-{
-    int productId;
-    std::string name;
-    std::string category;
-    double price;
-    int stock;
-};
-
 int main()
 {
-    std::cout << "=== nosqldb User Storage Example ===\n" << std::endl;
+    std::cout << "=== nosqldb Protobuf Storage Example (2026) ===\n" << std::endl;
     
     // Конфигурация
     StorageConfig config;
@@ -38,50 +18,59 @@ int main()
     config.enableVersioning = true;
     config.enableIndexing = true;
     config.maxVersionsPerKey = 5;
+    config.dataDirectory = "./example_db"; 
     
     // Создание базы данных
     NoSQLDataBase db(config);
     
     // 1. Добавление пользователей
-    std::cout << "1. Adding users..." << std::endl;
+    std::cout << "1. Adding users (Protobuf)..." << std::endl;
     
-    User users[] = {
-        {1, "Alice", "alice@example.com", 25, "New York"},
-        {2, "Bob", "bob@company.com", 30, "London"},
-        {3, "Charlie", "charlie@test.org", 22, "Paris"},
-        {4, "Diana", "diana@web.dev", 28, "Berlin"},
-        {5, "Eve", "eve@security.net", 35, "Tokyo"}
+    // Вспомогательная функция для создания объектов Protobuf
+    auto create_user = [](int id, std::string name, std::string email, int age, std::string city) {
+        data::User u;
+        u.set_id(id);
+        u.set_name(name);
+        u.set_email(email);
+        u.set_age(age);
+        u.set_city(city);
+        return u;
+    };
+
+    std::vector<data::User> users = {
+        create_user(1, "Alice", "alice@example.com", 25, "New York"),
+        create_user(2, "Bob", "bob@company.com", 30, "London"),
+        create_user(3, "Charlie", "charlie@test.org", 22, "Paris"),
+        create_user(4, "Diana", "diana@web.dev", 28, "Berlin"),
+        create_user(5, "Eve", "eve@security.net", 35, "Tokyo")
     };
     
     for (const auto& user : users) {
-        std::string key = "user:" + std::to_string(user.id);
+        std::string key = "user:" + std::to_string(user.id());
         db.Put(key, user);
-        std::cout << "   Added: " << user.name << " (ID: " << user.id << ")" << std::endl;
+        std::cout << "   Added: " << user.name() << " (ID: " << user.id() << ")" << std::endl;
     }
     
     // 2. Создание вторичных индексов
     std::cout << "\n2. Creating secondary indexes..." << std::endl;
     
-    // Индекс по email
-    db.CreateIndex<User, std::string>(
+    // Индекс по email (string)
+    db.CreateIndex<data::User, std::string>(
         "user_email_idx",
-        [](const User& u) { return u.email; }
+        [](const data::User& u) { return u.email(); }
     );
-    std::cout << "   Created index: user_email_idx" << std::endl;
     
-    // Индекс по возрасту
-    db.CreateIndex<User, int>(
+    // Индекс по возрасту (int)
+    db.CreateIndex<data::User, int>(
         "user_age_idx",
-        [](const User& u) { return u.age; }
+        [](const data::User& u) { return u.age(); }
     );
-    std::cout << "   Created index: user_age_idx" << std::endl;
     
-    // Индекс по городу
-    db.CreateIndex<User, std::string>(
+    // Индекс по городу (string)
+    db.CreateIndex<data::User, std::string>(
         "user_city_idx",
-        [](const User& u) { return u.city; }
+        [](const data::User& u) { return u.city(); }
     );
-    std::cout << "   Created index: user_city_idx" << std::endl;
     
     // 3. Запросы с использованием индексов
     std::cout << "\n3. Querying with indexes..." << std::endl;
@@ -90,9 +79,9 @@ int main()
     std::cout << "   Users with email 'alice@example.com':" << std::endl;
     auto usersByEmail = db.QueryByIndex<std::string>("user_email_idx", "alice@example.com");
     for (const auto& key : usersByEmail) {
-        auto user = db.Get<User>(key);
-        if (user) {
-            std::cout << "     - " << user->name << " (ID: " << user->id << ")" << std::endl;
+        auto userOpt = db.Get<data::User>(key);
+        if (userOpt) {
+            std::cout << "     - " << userOpt->name() << " (ID: " << userOpt->id() << ")" << std::endl;
         }
     }
     
@@ -100,70 +89,64 @@ int main()
     std::cout << "\n   Users aged 25-30:" << std::endl;
     auto usersByAge = db.QueryRange<int>("user_age_idx", 25, 30);
     for (const auto& key : usersByAge) {
-        auto user = db.Get<User>(key);
-        if (user) {
-            std::cout << "     - " << user->name << " (" << user->age << " years)" << std::endl;
-        }
-    }
-    
-    // Поиск по городу
-    std::cout << "\n   Users in London:" << std::endl;
-    auto usersInLondon = db.QueryByIndex<std::string>("user_city_idx", "London");
-    for (const auto& key : usersInLondon) {
-        auto user = db.Get<User>(key);
-        if (user) {
-            std::cout << "     - " << user->name << std::endl;
+        auto userOpt = db.Get<data::User>(key);
+        if (userOpt) {
+            std::cout << "     - " << userOpt->name() << " (" << userOpt->age() << " years)" << std::endl;
         }
     }
     
     // 4. Обновление данных
     std::cout << "\n4. Updating data..." << std::endl;
     
-    // Получаем Alice
     auto aliceKey = "user:1";
-    auto aliceOpt = db.Get<User>(aliceKey);
+    auto aliceOpt = db.Get<data::User>(aliceKey);
     if (aliceOpt) {
-        User updatedAlice = *aliceOpt;
-        updatedAlice.age = 26;  // День рождения!
+        data::User updatedAlice = *aliceOpt;
+        updatedAlice.set_age(26); // Protobuf сеттер
         
-        // Обновляем
         db.Put(aliceKey, updatedAlice);
-        std::cout << "   Updated Alice's age to " << updatedAlice.age << std::endl;
+        std::cout << "   Updated Alice's age to " << updatedAlice.age() << std::endl;
         
-        // Проверяем, что индекс обновился
         auto youngUsers = db.QueryRange<int>("user_age_idx", 25, 26);
-        std::cout << "   Users aged 25-26 after update: " << youngUsers.size() << std::endl;
+        std::cout << "   Keys in age range 25-26 after update: " << youngUsers.size() << std::endl;
     }
     
     // 5. Версионность
     std::cout << "\n5. Version history..." << std::endl;
     
-    // Несколько обновлений
+    const std::string tempKey = "temp:user";
     for (int i = 1; i <= 3; i++) {
-        User tempUser{6, "TempUser", "temp@test.com", 20 + i, "TestCity"};
-        db.PutWithVersion("temp:user", tempUser);
+        data::User tempUser = create_user(6, "TempUser", "temp@test.com", 20 + i, "TestCity");
+        db.PutWithVersion(tempKey, tempUser);
     }
     
-    auto versions = db.GetVersions<User>("temp:user");
-    std::cout << "   Version history for temp:user:" << std::endl;
+    auto versions = db.GetVersions<data::User>(tempKey);
+    std::cout << "   Version history for " << tempKey << ":" << std::endl;
     for (size_t i = 0; i < versions.size(); i++) {
-        std::cout << "     v" << i + 1 << ": " << versions[i].name 
-                  << " (age: " << versions[i].age << ")" << std::endl;
+        std::cout << "     v" << i + 1 << ": " << versions[i].name() 
+                  << " (age: " << versions[i].age() << ")" << std::endl;
     }
     
-    // 6. Метрики производительности
-    std::cout << "\n6. Performance metrics:" << std::endl;
-    auto metrics = db.GetMetrics();
-    std::cout << "   Total users: " << metrics.totalItems << std::endl;
-    std::cout << "   Items in cache: " << metrics.cachedItems << std::endl;
-    std::cout << "   Cache hit ratio: " << metrics.cacheHitRatio * 100 << "%" << std::endl;
-    std::cout << "   Number of indexes: " << metrics.indexCount << std::endl;
-    std::cout << "   Total versions stored: " << metrics.versionCount << std::endl;
+    // 6. Пример с Product
+    std::cout << "\n6. Working with Products..." << std::endl;
+    data::Product prod;
+    prod.set_product_id(101);
+    prod.set_name("Quantum Computer");
+    prod.set_price(999999.99);
+    prod.set_category("Hardware");
     
-    // 7. Удаление
-    std::cout << "\n7. Cleanup..." << std::endl;
-    db.Delete("temp:user");
-    std::cout << "   Deleted temp:user" << std::endl;
+    db.Put("prod:101", prod);
+    auto retrievedProd = db.Get<data::Product>("prod:101");
+    if (retrievedProd) {
+        std::cout << "   Retrieved Product: " << retrievedProd->name() 
+                  << " ($" << retrievedProd->price() << ")" << std::endl;
+    }
+
+    // 7. Метрики
+    std::cout << "\n7. Performance metrics:" << std::endl;
+    auto metrics = db.GetMetrics();
+    std::cout << "   Total items: " << metrics.totalItems << std::endl;
+    std::cout << "   Number of indexes: " << metrics.indexCount << std::endl;
     
     std::cout << "\n=== Example completed ===" << std::endl;
     

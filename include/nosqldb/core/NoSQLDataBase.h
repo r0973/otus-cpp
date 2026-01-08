@@ -7,15 +7,17 @@
 #include <functional>
 #include "StorageConfig.h"
 #include "MemoryStorage.h"
+#include "DiskStorage.h"
 
 namespace nosqldb
 {
 
 class NoSQLDataBase {
 public:
-    explicit NoSQLDataBase(const StorageConfig& config = StorageConfig())
-        : config_(config),
-          storage_(std::make_unique<MemoryStorage>(config)) {}
+    explicit NoSQLDataBase(const StorageConfig& config = StorageConfig{})
+    : config_(config)
+    , storage_(std::make_unique<DiskStorage>(config))
+    {}
     // Явно запрещаем копирование
     NoSQLDataBase(const NoSQLDataBase&) = delete;
     NoSQLDataBase& operator=(const NoSQLDataBase&) = delete;

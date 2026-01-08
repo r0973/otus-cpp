@@ -10,12 +10,13 @@ class ConcurrentTest : public ::testing::Test {
 protected:
     void SetUp() override {
         config.lruCacheCapacity = 1000;
-        config.enableIndexing = false; //TODO: временно отключили индексы.
+        config.enableIndexing = false; //отключили индексы
         db = std::make_unique<NoSQLDataBase>(config);
     }
     
     void TearDown() override {
         db.reset();
+        fs::remove_all(config.dataDirectory);
     }
     
     StorageConfig config;

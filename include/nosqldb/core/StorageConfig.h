@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <string>
+#include "Logger.h"
 
 namespace nosqldb
 {
@@ -9,9 +10,6 @@ namespace nosqldb
 struct StorageConfig {
     // Размер LRU кэша
     size_t lruCacheCapacity = 1000;
-    
-    // Настройки потоков
-    size_t threadPoolSize = 4;
     
     // Версионность
     bool enableVersioning = false;
@@ -22,7 +20,7 @@ struct StorageConfig {
     
     // Логирование
     bool enableLogging = true;
-    std::string logLevel = "INFO"; // DEBUG, INFO, WARN, ERROR
+    LogLevel logLevel = LogLevel::INFO; // DEBUG, INFO, WARN, ERROR
     
     // Производительность
     bool asyncOperations = false;

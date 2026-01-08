@@ -4,6 +4,7 @@
 #include <string>
 #include <filesystem>
 #include "AnyData.h"
+#include "Logger.h"
 #include "protos/nosql_service.pb.h"
 
 namespace fs = std::filesystem;
@@ -13,13 +14,26 @@ namespace nosqldb {
 class WalManager {
 public:
     explicit WalManager(const std::string& directory) {
+        if(!fs::exists(directory)) {
+            // Если до этого не создан директорий, попробуем создать
+            if(!fs::create_directory(directory)) {
+                std::string msg = "Directory does not exists: " + directory;
+                Logger::GetInstance().Log(LogLevel::INFO, "[WALMANAGER]" + msg );
+                throw std::runtime_error(msg);
+            }
+        }
         wal_path_ = (std::filesystem::path(directory) / "wal.log").string();
         log_file_.open(wal_path_, std::ios::app | std::ios::binary);
+        if (!log_file_.is_open()) {
+            // Логируем ошибку
+            Logger::GetInstance().Log(LogLevel::INFO, "[WALMANAGER] Failed to open WAL file: " + wal_path_);
+        }
     }
 
     void LogPut(const std::string& key, const proto::AnyDataProto& value) {
         std::lock_guard lock(mutex_);
-        if (!log_file_.is_open()) return;
+        if (!log_file_.is_open())
+            return;
         
         // ВАЖНО: Добавляем тип операции 1 для Put
         uint8_t type = 1;
